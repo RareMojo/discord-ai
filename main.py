@@ -2,7 +2,7 @@ import asyncio
 from pathlib import Path
 
 from discord_bot.build import BuildBot
-from utils.db import DB, DBs
+from utils.tools import make_filepaths
 
 #              __
 #             /\ \__                                 __
@@ -16,7 +16,7 @@ from utils.db import DB, DBs
 #
 #
 #
-# gpt-engineer-discord-bot: A basic Discord bot written in Python.
+# gpt-engineer-discordbot: A basic Discord bot written in Python with LangChain and ChatGPT integration.
 # This bot is to serve all users and developers at the gpt-engineer project discord.
 # Thanks and have fun yall!
 
@@ -27,25 +27,28 @@ def launch_bot():
 
     Launch this file to start the bot. Run: `python main.py` in the command line.
     """
-    root_dir = Path(__file__).parent.parent.absolute()
-    configs_dir = Path(root_dir / "configs")
     src_dir = Path(__file__).parent.absolute()
+    configs_dir = Path(src_dir / "configs")
     data_dir = Path(src_dir / "data")
-    assets = Path(root_dir / "assets")
+    assets = Path(src_dir / "assets")
     bot_dir = Path(src_dir / "discord_bot")
     logs_dir = Path(data_dir / "logs")
     cogs_dir = Path(src_dir / "cogs")
 
-    dbs = DBs(
-        bot=DB(bot_dir),
-        logs=DB(logs_dir),
-        configs=DB(configs_dir),
-        assets=DB(assets),
-        cogs=DB(cogs_dir),
-        data=DB(data_dir),
-    )
+    paths = {
+        "root": src_dir,
+        "configs": configs_dir,
+        "src": src_dir,
+        "data": data_dir,
+        "assets": assets,
+        "bot": bot_dir,
+        "logs": logs_dir,
+        "cogs": cogs_dir,
+    }
 
-    builder = BuildBot(dbs)
+    make_filepaths(paths)
+
+    builder = BuildBot(paths)
     bot = builder.build_bot()
 
     if bot:

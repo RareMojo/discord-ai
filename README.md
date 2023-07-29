@@ -20,9 +20,28 @@
 
 Before you begin, ensure you have met the following requirements:
 
-- You have installed the latest version of Python.
-- You have a Windows/Linux/Mac machine.
-- You have read the [official Discord bot guide](https://discordpy.readthedocs.io/en/stable/discord.html).
+- [Python 3.9+](https://www.python.org/downloads/)
+- [Windows/Linux/MacOS](https://lmgtfy.app/?q=what+operating+system+do+i+have)
+- [Discord App](https://discordpy.readthedocs.io/en/stable/discord.html)
+
+### OpenAI API Key
+
+1. **Sign up at OpenAI**: Visit the [OpenAI website](https://www.openai.com/) and sign up for an account.
+2. **Go to API keys**: Click your profile icon and select "View API keys" from the dropdown menu.
+3. **Create an API key**: Click the "Create new secret key" button to generate a new key.
+
+### Pinecone DB
+
+1. **Sign up for Pinecone**: Visit the [Pinecone website](https://www.pinecone.io/) and sign up for an account.
+2. **Get your Pinecone API key**: After signing up, navigate to your dashboard and obtain your Pinecone API key.
+[Video Tutorial](https://youtu.be/dnEfQhjZgw0?t=328)
+
+### MongoDB
+
+1. **Sign up for Railway**: Visit the [Railway.app website](https://railway.app/) and sign up for an account.
+2. **Create a new project**: Follow the [official Railway documentation](https://docs.railway.app/getting-started#create-a-project) to create a new project.
+3. **Add MongoDB plugin**: In your Railway project, add the MongoDB plugin by following the [official Railway documentation](https://docs.railway.app/getting-started).
+[Video Tutorial](https://www.youtube.com/watch?v=tp0bQNDtLPc&t=88s)
 
 <br>
 
@@ -68,19 +87,22 @@ sh start.sh
 
 ## Configuration
 
-Create a \`.env\` file in the root directory of the project, and add your keys:
+Open `example_.env` file in the root directory of the project, and add your keys:
 
 ```env
-OPENAI_API_KEY=your_openai_key
-SERPAPI_API_KEY=your_serapi_key
-DISCORD_TOKEN=your_discord_bot_key
-DISCORD_GUILD_ID=your_discord_guild_id
-CHATBOT_CATEGORY_ID=your_chat_category_id
-CHATBOT_THREADS_ID=your_chat_threads_id
-OPENAI_MODEL="gpt-3.5-turbo-16k"
+OPENAI_API_KEY=your-key-here
+DISCORD_TOKEN=your-token-here
+DISCORD_GUILD_ID=your-server-id-here
+CHATBOT_CATEGORY_ID=your-aichat-category-id-here
+CHATBOT_THREADS_ID=your-aichat-threads-id-here
+OPENAI_MODEL=gpt-3.5-turbo-16k
+MONGO_URI=your-mongo-uri-here
+PINECONE_API_KEY=your-pinecone-api-key-here
+PINECONE_INDEX=your-pinecone-index-here
+PINECONE_ENV=your-pinecone-env-here
 ```
 
-Replace \`your_openai_key\`, \`your_discord_bot_key\`, \`your_serapi_key\`, and \`your_chat_channel_id\` with your actual keys and IDs.
+Rename the file to `.env` and save it.
 
 <br>
 
@@ -101,6 +123,19 @@ To contribute to GPT Engineer Discord Bot, follow these steps:
 5. Create the pull request.
 
 Alternatively, see the GitHub documentation on [creating a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
+
+<br>
+
+## Credits & Thanks
+
+I'm grateful to the creators of these open source projects:
+- [Langchain-Chatbot](https://github.com/Haste171/langchain-chatbot) by Haste171
+- [Write-the](https://github.com/Wytamma/write-the) by Wytamma
+
+<br>
+
+Their contributions have enhanced and reduced workload for our chat bot's functionality and streamlined documentation. <br>
+Thank you, Haste171 and Wytamma, for inspiring developers and allowing others to incorporate and use your work.
 
 <br>
 

@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from utils.db import DBs
 from utils.logger import terminal_command_loop
 
 load_dotenv()
@@ -18,10 +17,13 @@ OWNER_ID = os.getenv("OWNER_ID")
 GUILD_ID = os.getenv("DISCORD_GUILD_ID")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL")
+PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
+PINECONE_ENV = os.environ.get("PINECONE_ENV")
+PINECONE_INDEX = os.environ.get("PINECONE_INDEX")
+
 
 if TYPE_CHECKING:
     from discord import Intents
-
     from utils.logger import Logger
 
 
@@ -30,16 +32,31 @@ class Bot(commands.Bot):
 
     Attributes:
         intents (discord.Intents): The bot's intents.
-        dbs (DBs): The bot's databases.
         logger (Logger): The bot's logger.
     """
-    def __init__(self, intents: 'Intents', dbs: DBs, logger: 'Logger'):
+
+    def __init__(self, intents: "Intents", paths: dict, logger: "Logger"):
+        """
+        Initializes the Bot class.
+        Args:
+          intents (discord.Intents): The bot's intents.
+          paths (dict): A dictionary of paths.
+          logger (Logger): The bot's logger.
+        Side Effects:
+          Sets the bot's logger, paths, config file, avatar file, cogs directory, guild ID, owner ID, chatbot category ID, chatbot threads ID, Discord token, OpenAI API key, OpenAI model, Pinecone API key, Pinecone environment, and Pinecone index.
+          Loads the config file.
+          Sets the bot's display name.
+        Examples:
+          >>> bot = Bot(intents, paths, logger)
+          Bot built.
+          Bot initialized.
+        """
         self.log = logger
         self.log.debug("Bot built.")
-        self.dbs = dbs
-        self.config_file = dbs.configs.path / "config.json"
-        self.avatar_file = dbs.assets.path / "images" / "avatar.png"
-        self.cogs_dir = dbs.cogs.path
+        self.paths = paths
+        self.config_file = self.paths["configs"] / "config.json"
+        self.avatar_file = self.paths["assets"] / "images" / "avatar.png"
+        self.cogs_dir = self.paths["cogs"]
         self.guild_id = int(GUILD_ID) if GUILD_ID else None
         self.owner_id = int(OWNER_ID) if OWNER_ID else None
         self.chatbot_category_id = CHATBOT_CATEGORY_ID
@@ -47,7 +64,9 @@ class Bot(commands.Bot):
         self.discord_token = str(DISCORD_TOKEN)
         self.openai_api_key = str(OPENAI_API_KEY)
         self.openai_model = str(OPENAI_MODEL)
-        
+        self.pinecone_api_key = str(PINECONE_API_KEY)
+        self.pinecone_env = str(PINECONE_ENV)
+        self.pinecone_index = str(PINECONE_INDEX)
 
         with open(self.config_file, "r") as f:
             self.config = json.load(f)
@@ -63,10 +82,8 @@ class Bot(commands.Bot):
         self.log.info("Bot starting...")
         await self.load_cogs()
 
-        bot_task = asyncio.create_task(
-            self.start(self.discord_token), name="bot")
-        command_task = asyncio.create_task(
-            terminal_command_loop(self), name="terminal")
+        bot_task = asyncio.create_task(self.start(self.discord_token), name="bot")
+        command_task = asyncio.create_task(terminal_command_loop(self), name="terminal")
 
         try:
             while self.running:
@@ -95,7 +112,8 @@ class Bot(commands.Bot):
                     cog_name = f"cogs.{filename[:-3]}"
                     if cog_name in self.extensions:
                         self.log.debug(
-                            f"Skipping - [ {filename[:-3]} ] (already loaded)")
+                            f"Skipping - [ {filename[:-3]} ] (already loaded)"
+                        )
                         continue
                     await self.load_extension(cog_name)
                     self.log.debug(f"Loaded - [ {filename[:-3]} ]")

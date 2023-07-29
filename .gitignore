@@ -1,6 +1,8 @@
-venv/
-data/
-configs/config.json
 .env
+.github/
 __pycache__/
-__init__.py
+.configs/config.json
+.venv/
+data/
+venv/
+configs/config.json
