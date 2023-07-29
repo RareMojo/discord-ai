@@ -49,8 +49,6 @@ Before you begin, ensure you have met the following requirements:
 
 To install the GPT Engineer Discord Bot, follow these steps:
 
-<br>
-
 1. Clone the repository:
 
 ```bash
@@ -68,8 +66,6 @@ cd gpt-engineer-discordbot
 <br>
 
 3. Run the start script:
-
-<br>
 
 For Windows:
 
