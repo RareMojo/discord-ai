@@ -1,12 +1,12 @@
 <br/>
 <p align="center">
 
-  <img align="center" width="150" height="150" src="https://cdn.discordapp.com/icons/1119885301872070706/cfc3f8e3fc867c9a174ab9a7a11397e9.webp?size%253D100">
+  <img align="center" width="250" height="250" src="https://i.imgur.com/7VclQXi.png">
 
   <h3 align="center">GPT Engineer Discord Bot</h3>
 
   <p align="center">
-    Our communities personal assistant!
+    Our community personal assistant.
     <br/>
     <br/>
     <a href="https://github.com/AntonOsika/gpt-engineer"><strong>Check out GPT-Engineer! »</strong></a>
@@ -113,9 +113,9 @@ After installation and configuration, the bot will run automatically. It uses th
 To contribute to GPT Engineer Discord Bot, follow these steps:
 
 1. Fork this repository.
-2. Create a branch: \`git checkout -b <branch_name>\`.
-3. Make your changes and commit them: \`git commit -m '<commit_message>'\`
-4. Push to the original branch: \`git push origin <project_name>/<location>\`
+2. Create a branch: `git checkout -b <branch_name>\`
+3. Make your changes and commit them: `git commit -m <commit_message>`
+4. Push to the original branch: `git push origin <project_name>/<location>`
 5. Create the pull request.
 
 Alternatively, see the GitHub documentation on [creating a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
