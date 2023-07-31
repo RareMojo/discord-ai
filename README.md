@@ -67,6 +67,8 @@ cd gpt-engineer-discordbot
 
 3. Run the start script:
 
+<br>
+
 For Windows:
 
 ```bash

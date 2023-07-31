@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands
 
-from utils.ingest_docs import ingest_docs
+from utils.ingest import ingest
 from utils.mongo_db import MongoDBHandler
-from utils.logger import log_debug, log_error, log_info
+from discord_bot.logger import log_debug, log_error, log_info
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
@@ -18,31 +18,31 @@ sys.path.append("../")
 handler = MongoDBHandler("database")
 
 
-class IngestDocsCog(commands.Cog):
+class IngestDBCog(commands.Cog):
     """
     Cog for ingesting documentation URLs.
     """
 
     def __init__(self, bot: "Bot"):
         """
-        Initializes the IngestDocsCog class.
+        Initializes the IngestDBCog class.
         Args:
           bot (Bot): The Bot instance.
         """
         self.bot = bot
 
     @commands.hybrid_command()
-    async def ingestdocs(self, ctx: commands.Context, url: str, docs_name: str):
+    async def ingestdb(self, ctx: commands.Context, url: str, db_name: str):
         """
         Ingests a documentation URL.
         Args:
           ctx (commands.Context): The context of the command.
           url (str): The URL of the documentation to ingest.
-          docs_name (str): The name of the documentation.
+          db_name (str): The name of the documentation.
         Returns:
           discord.Embed: An embed containing the result of the ingestion.
         Examples:
-          >>> await ctx.send(embed=await ingestdocs(ctx, 'https://example.com', 'Example Docs'))
+          >>> await ctx.send(embed=await ingestdb(ctx, 'https://example.com', 'Example db'))
           Embed containing the result of the ingestion.
         """
         channel = ctx.channel
@@ -61,31 +61,31 @@ class IngestDocsCog(commands.Cog):
                     description=f"\n *This might take a while*",
                     color=embed_color,
                 )
-                await ctx.send(embed=embed)
+                await ctx.send(embed=embed, ephemeral=True)
                 log_debug(
-                    self.bot, f"Ingesting {url} as {docs_name} for {ctx.author.name}"
+                    self.bot, f"Ingesting {url} as {db_name} for {ctx.author.name}"
                 )
-                await ingest_docs(self.bot, url=url, namespace=random_uuid)
+                await ingest(self.bot, url=url, namespace=random_uuid)
                 current_time = datetime.now()
                 handler.handle_data(
                     user_id=str(ctx.author.id),
                     user_name=str(ctx.author.name),
-                    docs_name=docs_name,
-                    docs_id=random_uuid,
+                    db_name=db_name,
+                    db_id=random_uuid,
                     ingest_url=url,
                     ingested_time=current_time,
                 )
                 embed = discord.Embed(
                     title="Success",
-                    description=f"{url}\n**Docs Name:** `{docs_name}`\n**Docs ID:** `{random_uuid}`",
+                    description=f"{url}\n**db Name:** `{db_name}`\n**db ID:** `{random_uuid}`",
                     timestamp=current_time,
                     color=embed_color,
                 )
-                await ctx.send(embed=embed)
+                await ctx.send(embed=embed, ephemeral=True)
             except Exception as e:
                 log_error(
                     self.bot,
-                    f"Error ingesting {url} as {docs_name} for {ctx.author.name}: {e}",
+                    f"Error ingesting {url} as {db_name} for {ctx.author.name}: {e}",
                 )
                 embed = discord.Embed(
                     title="Error", description=f"Error: {e}", color=embed_color
@@ -95,18 +95,18 @@ class IngestDocsCog(commands.Cog):
         except Exception as e:
             log_error(
                 self.bot,
-                f"Error ingesting {url} as {docs_name} for {ctx.author.name}: {e}",
+                f"Error ingesting {url} as {db_name} for {ctx.author.name}: {e}",
             )
             embed = discord.Embed(
                 title="Error", description=f"Error: {e}", color=embed_color
             )
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, ephemeral=True)
 
 
 async def setup(bot: "Bot") -> None:
     """Loads the cog."""
     try:
-        await bot.add_cog(IngestDocsCog(bot))
-        log_debug(bot, "IngestDocsCog loaded.")
+        await bot.add_cog(IngestDBCog(bot))
+        log_debug(bot, "IngestDBCog loaded.")
     except Exception as e:
-        log_error(bot, f"Error loading IngestDocsCog: {e}")
+        log_error(bot, f"Error loading IngestDBCog: {e}")

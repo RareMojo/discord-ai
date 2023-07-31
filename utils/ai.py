@@ -13,7 +13,7 @@ from langchain.prompts.chat import (ChatPromptTemplate,
                                     SystemMessagePromptTemplate)
 from langchain.vectorstores import Pinecone
 
-from utils.logger import log_debug
+from discord_bot.logger import log_debug, log_error, log_info
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot

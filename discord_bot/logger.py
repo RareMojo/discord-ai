@@ -1,12 +1,10 @@
-import asyncio
+
 import logging
 import os
 import re
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import TYPE_CHECKING
-
-from utils.terminal import TerminalCommands
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
@@ -206,89 +204,6 @@ class LoggerRotator(RotatingFileHandler):
 
 
 # Extra logging functions
-
-
-async def terminal_command_loop(bot: "Bot"):
-    """
-    Runs a loop to handle terminal commands.
-    Args:
-      bot (Bot): The bot instance.
-    Returns:
-      None
-    Examples:
-      >>> await terminal_command_loop(bot)
-    """
-    owner_name = bot.config.get("owner_name")
-    bot_name = bot.config.get("bot_name")
-    loop = asyncio.get_event_loop()
-    delay = 0.25
-    launch_delay = 3.5
-    green = LoggerFormat.green
-    black = LoggerFormat.black
-    purple = LoggerFormat.purple
-    bold = LoggerFormat.bold
-    reset = LoggerFormat.reset
-
-    if bot.running:
-        await asyncio.sleep(launch_delay)
-
-    while bot.running:
-        await asyncio.sleep(delay)
-        terminal_format = f"{bold}{green}{owner_name}{reset}{bold}{black}@{reset}{bold}{purple}{bot_name}{reset}"
-        terminal_prompt = f"{terminal_format}{black}{bold}: > {reset}"
-
-        terminal_command = loop.run_in_executor(None, input, terminal_prompt)
-
-        command_handler = TerminalCommands(bot, await terminal_command)
-        await command_handler.handle_terminal_command()
-
-
-async def welcome_to_bot(bot: "Bot") -> None:
-    """
-    Prints bot instance details and a welcome message.
-    Args:
-      bot (Bot): The bot instance.
-    Returns:
-      None
-    Examples:
-      >>> welcome_to_bot(bot)
-      Bot Instance Details:
-      Display name: BotName
-      Presence: Playing a game
-      Linked with Guild | ID: 123456789
-      Bot is online and ready.
-      Welcome to BotName!
-      Be sure to check out the documentation at the GitHub repository.
-      Type 'help' for a list of terminal commands.
-    """
-    bot_name = bot.config.get("bot_name")
-    presence = bot.config.get("presence")
-    owner_name = bot.config.get("owner_name")
-
-    try:
-        bot.log.debug("Starting welcome_to_bot function...")
-        bot.log.info("Bot Instance Details:")
-        bot.log.info(f"Display name: {bot_name}")
-        bot.log.info(f"Presence: {presence}")
-
-        for guild in bot.guilds:
-            bot.log.info(f"Linked with {guild} | ID: {guild.id}")
-
-        bot.log.info("Bot is online and ready.")
-
-        if bot.config.get("update_bot") == False:
-            bot.log.info(f"Welcome back to {bot_name}, {owner_name}!")
-            bot.log.info("Type 'help' for a list of terminal commands.")
-        else:
-            bot.log.info(f"Welcome to {bot_name}!")
-            bot.log.info(
-                "Be sure to check out the documentation at the GitHub repository."
-            )
-            bot.log.info("Type 'help' for a list of terminal commands.")
-
-    except Exception as e:
-        bot.log.error(f"Error in welcome_to_bot function: {e}")
-
 
 def log_debug(bot: "Bot", message: str) -> None:
     """

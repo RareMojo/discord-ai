@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from utils.mongo_db import MongoDBHandler
-from utils.logger import log_error, log_debug
+from discord_bot.logger import log_debug, log_error, log_info
 import sys
 from typing import TYPE_CHECKING
 
@@ -13,21 +13,21 @@ handler = MongoDBHandler("database")
 embed_color = discord.Color.blurple()
 
 
-class ListDocsCog(commands.Cog):
+class ListDBCog(commands.Cog):
     """
     Cog for listing documents.
     """
 
     def __init__(self, bot: "Bot"):
         """
-        Initializes the ListDocsCog class.
+        Initializes the ListDBCog class.
         Args:
           bot (Bot): The bot instance.
         """
         self.bot = bot
 
     @commands.hybrid_command()
-    async def listdocs(self, ctx: commands.Context):
+    async def listdb(self, ctx: commands.Context):
         """
         Lists all documents for a user.
         Args:
@@ -39,7 +39,7 @@ class ListDocsCog(commands.Cog):
         Notes:
           The command must be used in the chatbot category.
         Examples:
-          >>> listdocs
+          >>> listdb
           Sends an embed with the list of documents.
         """
         channel = ctx.channel
@@ -49,22 +49,22 @@ class ListDocsCog(commands.Cog):
             )
             return
         await ctx.defer()
-        docs_list = handler.list_docs(user_id=str(ctx.author.id))
-        embed = discord.Embed(title="Docs", color=embed_color)
+        db_list = handler.list_db(user_id=str(ctx.author.id))
+        embed = discord.Embed(title="db", color=embed_color)
         try:
-            log_debug(self.bot, f"Listing docs for user: {ctx.author.id}")
-            for docs in docs_list:
-                docs_name = docs["docs_name"]
-                docs_id = docs["docs_id"]
-                ingested_url = docs["ingested_url"]
-                ingested_time = docs["ingested_time"]
+            log_debug(self.bot, f"Listing db for user: {ctx.author.id}")
+            for db in db_list:
+                db_name = db["db_name"]
+                db_id = db["db_id"]
+                ingested_url = db["ingested_url"]
+                ingested_time = db["ingested_time"]
                 embed.add_field(
-                    name=docs_name,
-                    value=f"{ingested_url}\n**ID:** `{docs_id}`\n**Time:** `{ingested_time}`",
+                    name=db_name,
+                    value=f"{ingested_url}\n**ID:** `{db_id}`\n**Time:** `{ingested_time}`",
                     inline=False,
                 )
         except Exception as e:
-            embed.add_field(name="Error", value="No Docs Found", inline=True)
+            embed.add_field(name="Error", value="No db Found", inline=True)
             log_error(self.bot, e)
         await ctx.send(embed=embed)
 
@@ -72,7 +72,7 @@ class ListDocsCog(commands.Cog):
 async def setup(bot: "Bot") -> None:
     """Loads the cog."""
     try:
-        await bot.add_cog(ListDocsCog(bot))
-        log_debug(bot, "ListDocsCog loaded.")
+        await bot.add_cog(ListDBCog(bot))
+        log_debug(bot, "ListDBCog loaded.")
     except Exception as e:
-        log_error(bot, f"Error loading ListDocsCog: {e}")
+        log_error(bot, f"Error loading ListDBCog: {e}")

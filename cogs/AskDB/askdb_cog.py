@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 import discord
 from discord.ext import commands
 
-from discord_bot.ai import ChatQuery
+from utils.ai import ChatQuery
 from utils.mongo_db import MongoDBHandler
-from utils.logger import log_debug, log_error, log_info, log_warning
+from discord_bot.logger import log_debug, log_error, log_info
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
@@ -17,25 +17,25 @@ handler = MongoDBHandler("database")
 embed_color = discord.Color.blurple()
 
 
-class QueryDocsCog(commands.Cog):
+class AskDB(commands.Cog):
     """
     Cog for querying documents.
     """
 
     def __init__(self, bot: "Bot"):
         """
-        Initializes the QueryDocsCog.
+        Initializes the AskDB.
         Args:
           bot (Bot): The bot instance.
         """
         self.bot = bot
 
     @commands.hybrid_command()
-    async def askdocs(
+    async def askdb(
         self,
         ctx: commands.Context,
         query: str,
-        docs_id: str = "835629a1-2151-44b2-bf26-095a83367738", # default to the docs_id of gpt-engineer
+        db_id: str = "2349f359-9c6e-4436-b707-af6492ddd2d7", # default to the db_id of gpt-engineer
         source: bool = False,
     ):  
         """
@@ -43,11 +43,11 @@ class QueryDocsCog(commands.Cog):
         Args:
           ctx (commands.Context): The context of the command.
           query (str): The query to search for.
-          docs_id (str): The ID of the documents to search.
+          db_id (str): The ID of the documents to search.
         Returns:
           discord.Embed: An embed containing the query results.
         Examples:
-          >>> await ctx.send(embed=askdocs("What is GPT-Engineer?", "835629a1-2151-44b2-bf26-095a83367738"))
+          >>> await ctx.send(embed=askdb("What is GPT-Engineer?", "2349f359-9c6e-4436-b707-af6492ddd2d7"))
           Embed containing query results.
         """
         channel = ctx.channel
@@ -60,7 +60,7 @@ class QueryDocsCog(commands.Cog):
         chat_history = []
         log_debug(self.bot, f"Query: {query}")
         try:
-            chat_query = ChatQuery(self.bot, namespace=docs_id)
+            chat_query = ChatQuery(self.bot, namespace=db_id)
             q = chat_query.query()
             result = q({"question": query, "chat_history": chat_history})
             source_documents = result["source_documents"]
@@ -112,7 +112,7 @@ class QueryDocsCog(commands.Cog):
 async def setup(bot: "Bot") -> None:
     """Loads the cog."""
     try:
-        await bot.add_cog(QueryDocsCog(bot))
-        log_debug(bot, "QueryDocsCog loaded.")
+        await bot.add_cog(AskDB(bot))
+        log_debug(bot, "AskDB loaded.")
     except Exception as e:
-        log_error(bot, f"Error loading QueryDocsCog: {e}")
+        log_error(bot, f"Error loading AskDB: {e}")

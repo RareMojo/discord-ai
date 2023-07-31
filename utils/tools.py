@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -12,6 +13,53 @@ import requests
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
+
+
+async def welcome_to_bot(bot: "Bot") -> None:
+    """
+    Prints bot instance details and a welcome message.
+    Args:
+      bot (Bot): The bot instance.
+    Returns:
+      None
+    Examples:
+      >>> welcome_to_bot(bot)
+      Bot Instance Details:
+      Display name: BotName
+      Presence: Playing a game
+      Linked with Guild | ID: 123456789
+      Bot is online and ready.
+      Welcome to BotName!
+      Be sure to check out the documentation at the GitHub repository.
+      Type 'help' for a list of terminal commands.
+    """
+    bot_name = bot.config.get("bot_name")
+    presence = bot.config.get("presence")
+    owner_name = bot.config.get("owner_name")
+
+    try:
+        bot.log.debug("Starting welcome_to_bot function...")
+        bot.log.info("Bot Instance Details:")
+        bot.log.info(f"Display name: {bot_name}")
+        bot.log.info(f"Presence: {presence}")
+
+        for guild in bot.guilds:
+            bot.log.info(f"Linked with {guild} | ID: {guild.id}")
+
+        bot.log.info("Bot is online and ready.")
+
+        if bot.config.get("update_bot") == False:
+            bot.log.info(f"Welcome back to {bot_name}, {owner_name}!")
+            bot.log.info("Type 'help' for a list of terminal commands.")
+        else:
+            bot.log.info(f"Welcome to {bot_name}!")
+            bot.log.info(
+                "Be sure to check out the documentation at the GitHub repository."
+            )
+            bot.log.info("Type 'help' for a list of terminal commands.")
+
+    except Exception as e:
+        bot.log.error(f"Error in welcome_to_bot function: {e}")
 
 
 def get_new_config():
@@ -303,4 +351,125 @@ def make_filepaths(paths: dict):
       >>> make_filepaths({'config': Path('config.json'), 'cogs': Path('cogs')})
     """
     for path in paths.values():
-        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.suffix:
+            path.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            path.mkdir(parents=True, exist_ok=True)
+            
+
+def clean_response(bot: 'Bot', user: str, response: str):
+    """
+    Removes labels from a response string.
+    Args:
+      bot (Bot): The Bot instance.
+      user (str): The user's name.
+      response (str): The response string.
+    Returns:
+      str: The response string with labels removed.
+    Examples:
+      >>> clean_response(bot, "User", "User: Hello")
+      "Hello"
+    """
+    labels = [
+        "System: ",
+        "User: ",
+        "Assistant: ",
+        "[System]: ",
+        "[User]: ",
+        "[Assistant]: ",
+        f"{bot.config.get('persona')}: ",
+        f"[{bot.config.get('actor')}]: ",
+        f"{user}: ",
+        f"[{user}]: ",
+    ]
+
+    for label in labels:
+        response = response.replace(label, "")
+
+    return response
+
+
+def split_chat(chat, max_chars=2000):
+    """
+    Splits a chat into chunks of a maximum length.
+    Args:
+      chat (str): The chat string.
+      max_chars (int, optional): The maximum length of each chunk. Defaults to 2000.
+    Returns:
+      list: A list of chunks.
+    Examples:
+      >>> split_chat("Hello world!", 5)
+      ["Hello", " worl", "d!"]
+    """
+    lines = chat.split("\n")
+    chunks = []
+    chunk = ""
+    inside_code_block = False
+    language = ""
+
+    code_block_start_pattern = re.compile(r"^```[\s]*\w*")
+    code_block_end_pattern = re.compile(r"^```$")
+
+    def add_chunk(chunk):
+        """
+        Adds a chunk to a list of chunks.
+        Args:
+          chunk (str): The chunk to add.
+          chunks (list): The list of chunks.
+        Returns:
+          None
+        Side Effects:
+          Adds the chunk to the list of chunks.
+        Examples:
+          >>> chunks = []
+          >>> add_chunk("Hello", chunks)
+          >>> chunks
+          ["Hello"]
+        """
+        if chunk:
+            chunks.append(chunk)
+
+    for line in lines:
+        if code_block_start_pattern.match(line):
+            if not inside_code_block and chunk:
+                add_chunk(chunk)
+                chunk = ""
+            inside_code_block = True
+            language = line.strip("`").strip()
+
+            if len(chunk) + len(line) + 1 > max_chars:
+                add_chunk(chunk)
+                chunk = ""
+            chunk += line + "\n"
+            continue
+
+        elif code_block_end_pattern.match(line):
+            inside_code_block = False
+
+            if len(chunk) + len(line) + 1 > max_chars:
+                add_chunk(chunk)
+                chunk = ""
+            chunk += line + "\n"
+            add_chunk(chunk)
+            chunk = ""
+            continue
+
+        if inside_code_block:
+            if len(chunk) + len(line) + 1 > max_chars:
+                # Add the end delimiter for the current code block
+                chunk += "```\n"
+                add_chunk(chunk)
+                chunk = ""
+
+                # Start a new chunk with the correct language identifier
+                chunk += f"```{language}\n"
+            chunk += line + "\n"
+        else:
+            if len(chunk) + len(line) + 1 > max_chars:
+                add_chunk(chunk)
+                chunk = ""
+            chunk += line + "\n"
+
+    add_chunk(chunk)
+
+    return chunks

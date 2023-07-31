@@ -1,3 +1,4 @@
+import asyncio
 from typing import TYPE_CHECKING
 
 from utils.commands import (
@@ -22,6 +23,44 @@ from utils.tools import download_cogs
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
 
+
+async def terminal_command_loop(bot: "Bot"):
+    """
+    Runs a loop to handle terminal commands.
+    Args:
+      bot (Bot): The bot instance.
+    Returns:
+      None
+    Examples:
+      >>> await terminal_command_loop(bot)
+    """
+    owner_name = bot.config.get("owner_name")
+    bot_name = bot.config.get("bot_name")
+    loop = asyncio.get_event_loop()
+    delay = 0.25
+    launch_delay = 3.5
+    black = "\x1b[30m"
+    red = "\x1b[31m"
+    purple = "\x1b[35m"
+    cyan = "\x1b[36m"
+    green = "\x1b[32m"
+    yellow = "\x1b[33m"
+    gray = "\x1b[38m"
+    reset = "\x1b[0m"
+    bold = "\x1b[1m"
+
+    if bot.running:
+        await asyncio.sleep(launch_delay)
+
+    while bot.running:
+        await asyncio.sleep(delay)
+        terminal_format = f"{bold}{green}{owner_name}{reset}{bold}{black}@{reset}{bold}{purple}{bot_name}{reset}"
+        terminal_prompt = f"{terminal_format}{black}{bold}: > {reset}"
+
+        terminal_command = loop.run_in_executor(None, input, terminal_prompt)
+
+        command_handler = TerminalCommands(bot, await terminal_command)
+        await command_handler.handle_terminal_command()
 
 class TerminalCommands:
     """

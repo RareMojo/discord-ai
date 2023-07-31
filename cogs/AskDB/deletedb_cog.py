@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from utils.mongo_db import MongoDBHandler
-from utils.logger import log_debug, log_error
+from discord_bot.logger import log_debug, log_error, log_info
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
@@ -15,33 +15,33 @@ handler = MongoDBHandler("database")
 embed_color = 0xFD7C42
 
 
-class DeleteDocsCog(commands.Cog):
+class DeleteDBCog(commands.Cog):
     """
-    Cog for deleting docs.
+    Cog for deleting dbs.
     """
 
     def __init__(self, bot: "Bot"):
         """
-        Initializes the DeleteDocsCog class.
+        Initializes the DeleteDBCog class.
         Args:
           bot (Bot): The bot instance.
         """
         self.bot = bot
 
     @commands.hybrid_command()
-    async def deletedocs(self, ctx: commands.Context, docs_id: str):
+    async def deletedb(self, ctx: commands.Context, db_id: str):
         """
-        Deletes a docs with the given ID.
+        Deletes a db with the given ID.
         Args:
           ctx (commands.Context): The context of the command.
-          docs_id (str): The ID of the docs to delete.
+          db_id (str): The ID of the db to delete.
         Returns:
           None
         Examples:
-          >>> deletedocs("12345")
+          >>> deletedb("12345")
           Successfully deleted!
-          Docs name: <docs_name>
-          Docs ID: 12345
+          db name: <db_name>
+          db ID: 12345
         """
         channel = ctx.channel
         if channel.category.id != self.bot.chatbot_category_id:
@@ -50,15 +50,15 @@ class DeleteDocsCog(commands.Cog):
             )
             return
         await ctx.defer()
-        embed = discord.Embed(title="Delete Docs", color=embed_color)
+        embed = discord.Embed(title="Delete db", color=embed_color)
         try:
-            log_debug(self.bot, f"Deleting docs with ID: {docs_id}")
+            log_debug(self.bot, f"Deleting db with ID: {db_id}")
             user_id = str(ctx.author.id)
-            docs_name = handler.get_docs_name(user_id=user_id, docs_id=docs_id)
-            r = handler.delete_docs(user_id=user_id, docs_id=docs_id)
+            db_name = handler.get_db_name(user_id=user_id, db_id=db_id)
+            r = handler.delete_db(user_id=user_id, db_id=db_id)
             embed.add_field(
                 name="Status",
-                value=f"Successfully deleted!\n**Docs name:** `{docs_name}`\n**Docs ID:** `{docs_id}`",
+                value=f"Successfully deleted!\n**db name:** `{db_name}`\n**db ID:** `{db_id}`",
                 inline=True,
             )
         except ValueError as e:
@@ -70,7 +70,7 @@ class DeleteDocsCog(commands.Cog):
 async def setup(bot: "Bot") -> None:
     """Loads the cog."""
     try:
-        await bot.add_cog(DeleteDocsCog(bot))
-        log_debug(bot, "DeleteDocsCog loaded.")
+        await bot.add_cog(DeleteDBCog(bot))
+        log_debug(bot, "DeleteDBCog loaded.")
     except Exception as e:
-        log_error(bot, f"Error loading DeleteDocsCog: {e}")
+        log_error(bot, f"Error loading DeleteDBCog: {e}")

@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from utils.mongo_db import MongoDBHandler
-from utils.logger import log_error, log_debug
+from discord_bot.logger import log_debug, log_error, log_info
 import sys
 from typing import TYPE_CHECKING
 
@@ -13,23 +13,23 @@ handler = MongoDBHandler("database")
 embed_color = discord.Color.brand_green()
 
 
-class HelpDocsCog(commands.Cog):
+class HelpDBCog(commands.Cog):
     """
-    Cog for handling helpdocs commands.
+    Cog for handling HelpDBCog commands.
     """
 
     def __init__(self, bot: "Bot"):
         """
-        Initializes the HelpDocsCog class.
+        Initializes the HelpDBCog class.
         Args:
           bot (Bot): The bot instance.
         """
         self.bot = bot
 
     @commands.hybrid_command()
-    async def helpdocs(self, ctx: commands.Context):
+    async def helpdb(self, ctx: commands.Context):
         """
-        Sends a help message for the helpdocs commands.
+        Sends a help message for the helpdb commands.
         Args:
           ctx (commands.Context): The context of the command.
         Returns:
@@ -39,8 +39,8 @@ class HelpDocsCog(commands.Cog):
         Notes:
           The command is only available in the AI text-chat category.
         Examples:
-          >>> helpdocs
-          Sends a help message for the helpdocs commands.
+          >>> helpdb
+          Sends a help message for the helpdb commands.
         """
         channel = ctx.channel
         if channel.category.id != self.bot.chatbot_category_id:
@@ -49,39 +49,34 @@ class HelpDocsCog(commands.Cog):
                 ephemeral=True,
             )
             return
-        log_debug(self.bot, f"HelpDocs command used by user: {ctx.author.id}")
+        log_debug(self.bot, f"Helpdb command used by user: {ctx.author.id}")
         await ctx.defer(ephemeral=True)
-        embed = discord.Embed(title="Chatbot Docs Help", color=embed_color)
+        embed = discord.Embed(title="Chatbot db Help", color=embed_color)
         embed.set_author(
             name="GitHub [Click Here]",
             url="https://github.com/AntonOsika/gpt-engineer",
             icon_url="https://cdn.discordapp.com/attachments/1114412425115086888/1114413065933439058/25231.png",
         )
-        embed.add_field(name="/helpdocs", value="This help message.", inline=True)
+        embed.add_field(name="/helpdb", value="This help message.", inline=True)
         embed.add_field(
-            name="/ingestdocs",
-            value="Ingest a readthedocs.io documentation website.",
+            name="/ingestdb",
+            value="Ingest a readthedb.io documentation website.",
             inline=True,
         )
         embed.add_field(
-            name="/listdocs",
+            name="/listdb",
             value="View a list of your ingested documentation websites.",
             inline=True,
         )
         embed.add_field(
-            name="/deletedocs",
+            name="/deletedb",
             value="Delete an ingested documentation website from the list.",
             inline=True,
         )
         embed.add_field(
-            name="/askdocs",
+            name="/askdb",
             value="Ask about an ingested documentation website.",
             inline=True,
-        )
-        embed.add_field(
-            name="**Note:**",
-            value="All command messages are set to private.",
-            inline=False,
         )
         await ctx.send(embed=embed, ephemeral=True)
 
@@ -89,7 +84,7 @@ class HelpDocsCog(commands.Cog):
 async def setup(bot: "Bot") -> None:
     """Loads the cog."""
     try:
-        await bot.add_cog(HelpDocsCog(bot))
-        log_debug(bot, "HelpDocsCog loaded.")
+        await bot.add_cog(HelpDBCog(bot))
+        log_debug(bot, "HelpDBCog loaded.")
     except Exception as e:
-        log_error(bot, f"Error loading HelpDocsCog: {e}")
+        log_error(bot, f"Error loading HelpDBCog: {e}")

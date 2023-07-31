@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING, Optional
 import discord
 from discord.ext import commands
 
-from discord_bot.ai import ChatAgent
-from utils.logger import log_debug, log_error
-from utils.parser import split_chat
+from utils.ai import ChatAgent
+from discord_bot.logger import log_debug, log_error, log_info
+from utils.tools import split_chat
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
@@ -52,7 +52,8 @@ class ChatbotCog(
         """Called when a thread is created."""
         time.sleep(0.25)
         persona = self.bot.config.get("persona")
-        if thread.parent.name == "ai-chatbot":
+        # 
+        if thread.parent.id == self.bot.chatbot_threads_id:
             reply = (
                 f"Hello {thread.owner.mention}, please stay in this thread. "
                 f"\nDo not ping people in `{thread.name}` and do not make duplicates. "

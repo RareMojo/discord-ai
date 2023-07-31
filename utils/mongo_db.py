@@ -17,15 +17,15 @@ class MongoDBHandler:
         self.db = self.client[database_name]
 
     def handle_data(
-        self, user_id, user_name, docs_name, docs_id, ingest_url, ingested_time
+        self, user_id, user_name, db_name, db_id, ingest_url, ingested_time
     ):
         """
         Handles data for a user.
         Args:
           user_id (str): The ID of the user.
           user_name (str): The name of the user.
-          docs_name (str): The name of the document.
-          docs_id (str): The ID of the document.
+          db_name (str): The name of the document.
+          db_id (str): The ID of the document.
           ingest_url (str): The URL of the document.
           ingested_time (str): The time the document was ingested.
         Side Effects:
@@ -40,16 +40,16 @@ class MongoDBHandler:
             )
 
         data = {
-            "docs": {
-                "docs_name": docs_name,
-                "docs_id": docs_id,
+            "db": {
+                "db_name": db_name,
+                "db_id": db_id,
                 "ingested_url": ingest_url,
                 "ingested_time": ingested_time,
             }
         }
         user_collection.update_one({"user_id": user_id}, {"$push": {"data": data}})
 
-    def list_docs(self, user_id):
+    def list_db(self, user_id):
         """
         Lists all documents for a user.
         Args:
@@ -57,89 +57,89 @@ class MongoDBHandler:
         Returns:
           list: A list of documents for the user.
         Examples:
-          >>> list_docs('123')
-          [{'docs_name': 'doc1', 'docs_id': '456', 'ingested_url': 'www.example.com', 'ingested_time': '2020-01-01'}, {'docs_name': 'doc2', 'docs_id': '789', 'ingested_url': 'www.example.com', 'ingested_time': '2020-01-02'}]
+          >>> list_db('123')
+          [{'db_name': 'doc1', 'db_id': '456', 'ingested_url': 'www.example.com', 'ingested_time': '2020-01-01'}, {'db_name': 'doc2', 'db_id': '789', 'ingested_url': 'www.example.com', 'ingested_time': '2020-01-02'}]
         """
         user_collection = self.db["users"]
         user = user_collection.find_one({"user_id": user_id})
 
         if user:
-            docs = []
+            db = []
             for entry in user["data"]:
-                docs_data = {
-                    "docs_name": entry["docs"]["docs_name"],
-                    "docs_id": entry["docs"]["docs_id"],
-                    "ingested_url": entry["docs"]["ingested_url"],
-                    "ingested_time": entry["docs"]["ingested_time"],
+                db_data = {
+                    "db_name": entry["db"]["db_name"],
+                    "db_id": entry["db"]["db_id"],
+                    "ingested_url": entry["db"]["ingested_url"],
+                    "ingested_time": entry["db"]["ingested_time"],
                 }
-                docs.append(docs_data)
+                db.append(db_data)
 
-            if docs:
-                return docs
+            if db:
+                return db
             else:
-                return "You have no docs"
+                return "You have no db"
         else:
             return "User not found"
 
-    def delete_docs(self, user_id, docs_id):
+    def delete_db(self, user_id, db_id):
         """
         Deletes a document for a user.
         Args:
           user_id (str): The ID of the user.
-          docs_id (str): The ID of the document.
+          db_id (str): The ID of the document.
         Returns:
           bool: True if the document was deleted, False otherwise.
         Raises:
           ValueError: If the document with the given ID is not found.
         Examples:
-          >>> delete_docs('123', '456')
+          >>> delete_db('123', '456')
           True
         """
         user_collection = self.db["users"]
         result = user_collection.update_one(
-            {"user_id": user_id, "data.docs.docs_id": docs_id},
-            {"$pull": {"data": {"docs.docs_id": docs_id}}},
+            {"user_id": user_id, "data.db.db_id": db_id},
+            {"$pull": {"data": {"db.db_id": db_id}}},
         )
 
         if result.modified_count > 0:
             return True
         else:
-            raise ValueError(f"Docs with ID {docs_id} not found.")
+            raise ValueError(f"db with ID {db_id} not found.")
 
-    def get_docs_name(self, user_id, docs_id):
+    def get_db_name(self, user_id, db_id):
         """
         Gets the name of a document for a user.
         Args:
           user_id (str): The ID of the user.
-          docs_id (str): The ID of the document.
+          db_id (str): The ID of the document.
         Returns:
           str: The name of the document.
         Raises:
           ValueError: If the document with the given ID is not found.
         Examples:
-          >>> get_docs_name('123', '456')
+          >>> get_db_name('123', '456')
           'doc1'
         """
         user_collection = self.db["users"]
         user = user_collection.find_one(
-            {"user_id": user_id, "data.docs.docs_id": docs_id}
+            {"user_id": user_id, "data.db.db_id": db_id}
         )
 
         if user:
             for entry in user["data"]:
-                if entry["docs"]["docs_id"] == docs_id:
-                    return entry["docs"]["docs_name"]
+                if entry["db"]["db_id"] == db_id:
+                    return entry["db"]["db_name"]
 
-            raise ValueError(f"Docs with ID {docs_id} not found.")
+            raise ValueError(f"db with ID {db_id} not found.")
         else:
-            raise ValueError("No user found with the provided docs ID.")
+            raise ValueError("No user found with the provided db ID.")
 
-    def check_ownership(self, user_id, docs_id):
+    def check_ownership(self, user_id, db_id):
         """
         Checks if a user owns a document.
         Args:
           user_id (str): The ID of the user.
-          docs_id (str): The ID of the document.
+          db_id (str): The ID of the document.
         Returns:
           bool: True if the user owns the document, False otherwise.
         Examples:
@@ -148,12 +148,12 @@ class MongoDBHandler:
         """
         user_collection = self.db["users"]
         user = user_collection.find_one(
-            {"user_id": user_id, "data.docs.docs_id": docs_id}
+            {"user_id": user_id, "data.db.db_id": db_id}
         )
 
         if user:
             for entry in user["data"]:
-                if entry["docs"]["docs_id"] == docs_id:
+                if entry["db"]["db_id"] == db_id:
                     return True
             return False
         else:

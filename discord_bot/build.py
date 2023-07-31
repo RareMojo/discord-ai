@@ -5,7 +5,7 @@ from pathlib import Path
 from discord import Intents
 
 from discord_bot.bot import Bot
-from utils.logger import Logger
+from discord_bot.logger import Logger
 from utils.tools import download_cogs, get_new_config
 
 

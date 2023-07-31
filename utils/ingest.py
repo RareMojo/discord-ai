@@ -11,7 +11,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Pinecone
 
-from utils.logger import log_debug, log_error, log_info
+from discord_bot.logger import log_debug, log_error, log_info
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
@@ -41,7 +41,7 @@ async def download_file(bot: "Bot", session, url, output_directory):
             log_error(bot, f"Failed to download: {url}")
 
 
-async def ingest_docs(bot: "Bot", url, namespace):
+async def ingest(bot: "Bot", url, namespace):
     """
     Ingests documents from a given URL into Pinecone.
     Args:
@@ -51,7 +51,7 @@ async def ingest_docs(bot: "Bot", url, namespace):
     Side Effects:
       Ingests documents into Pinecone.
     Examples:
-      >>> ingest_docs(bot, 'https://example.com/docs', 'my_namespace')
+      >>> ingest_db(bot, 'https://example.com/db', 'my_namespace')
     """
     base_url = url
 
@@ -75,8 +75,8 @@ async def ingest_docs(bot: "Bot", url, namespace):
 
         from langchain.document_loaders.readthedocs import ReadTheDocsLoader
 
-        class MyReadTheDocsLoader(ReadTheDocsLoader):
-            """My custom ReadTheDocsLoader."""
+        class MyReadThedbLoader(ReadTheDocsLoader):
+            """My custom ReadThedbLoader."""
 
             def _clean_data(self, data: str) -> str:
                 """
@@ -86,7 +86,7 @@ async def ingest_docs(bot: "Bot", url, namespace):
                 Returns:
                   str: The cleaned string.
                 Examples:
-                  >>> MyReadTheDocsLoader._clean_data('<html><body>Hello World!</body></html>')
+                  >>> MyReadThedbLoader._clean_data('<html><body>Hello World!</body></html>')
                   'Hello World!'
                 """
                 from bs4 import BeautifulSoup
@@ -113,12 +113,12 @@ async def ingest_docs(bot: "Bot", url, namespace):
 
                 return "\n".join([t for t in text.split("\n") if t])
 
-        loader = MyReadTheDocsLoader(temp_dir, features="html.parser", encoding="utf-8")
-        docs = loader.load()
+        loader = MyReadThedbLoader(temp_dir, features="html.parser", encoding="utf-8")
+        db = loader.load()
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=2000, chunk_overlap=100
         )
-        texts = text_splitter.split_documents(docs)
+        texts = text_splitter.split_documents(db)
 
         pinecone.init(api_key=bot.pinecone_api_key, environment=bot.pinecone_env)
         embeddings = OpenAIEmbeddings(

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from utils.logger import terminal_command_loop
+from discord_bot.terminal import terminal_command_loop
 
 load_dotenv()
 
@@ -24,7 +24,7 @@ PINECONE_INDEX = os.environ.get("PINECONE_INDEX")
 
 if TYPE_CHECKING:
     from discord import Intents
-    from utils.logger import Logger
+    from discord_bot.logger import Logger
 
 
 class Bot(commands.Bot):
@@ -83,7 +83,6 @@ class Bot(commands.Bot):
         await self.load_cogs()
 
         bot_task = asyncio.create_task(self.start(self.discord_token), name="bot")
-        command_task = asyncio.create_task(terminal_command_loop(self), name="terminal")
 
         try:
             while self.running:
@@ -94,7 +93,22 @@ class Bot(commands.Bot):
 
         finally:
             bot_task.cancel()
-            command_task.cancel()
+            
+    async def start_terminal_command_loop(self):
+        """Starts the terminal command loop."""
+        self.log.debug("Starting terminal command loop...")
+        
+        terminal_task = asyncio.create_task(terminal_command_loop(self), name="terminal")
+        
+        try:
+            while self.running:
+                await asyncio.sleep(0)
+        
+        except Exception as e:
+            self.log.error(f"Terminal encountered an error: {e}")
+        
+        finally:
+            terminal_task.cancel()
 
     def stop_bot(self):
         """Stops bot."""
@@ -102,22 +116,30 @@ class Bot(commands.Bot):
         self.running = False
 
     async def load_cogs(self):
-        """Loads all cogs in the cogs directory."""
+        """Loads all cogs in the cogs directory and its subdirectories."""
         self.log.debug("Loading cogs...")
-        loaded_extensions = 0
+        total_loaded_extensions = 0
         cog_name = None
         try:
-            for filename in os.listdir(self.cogs_dir):
-                if filename.endswith("cog.py"):
-                    cog_name = f"cogs.{filename[:-3]}"
-                    if cog_name in self.extensions:
-                        self.log.debug(
-                            f"Skipping - [ {filename[:-3]} ] (already loaded)"
-                        )
-                        continue
-                    await self.load_extension(cog_name)
-                    self.log.debug(f"Loaded - [ {filename[:-3]} ]")
-                    loaded_extensions += 1
+            for dirpath, dirnames, filenames in os.walk(self.cogs_dir):
+                loaded_extensions = []
+                for filename in filenames:
+                    if filename.endswith("cog.py"):
+                        rel_path = os.path.relpath(dirpath, self.cogs_dir)
+                        if rel_path == '.':
+                            cog_name = f"cogs.{filename[:-3]}"
+                        else:
+                            cog_name = f"cogs.{rel_path.replace(os.sep, '.')}.{filename[:-3]}"
+                        if cog_name in self.extensions:
+                            continue
+                        await self.load_extension(cog_name)
+                        loaded_extensions.append(filename[:-3])
+                        total_loaded_extensions += 1
+                if loaded_extensions:
+                    package_name = "Standalone Cogs" if dirpath == self.cogs_dir else os.path.basename(dirpath)
+                    self.log.info("Loaded:")
+                    self.log.info(f"Package Name: {package_name}")
+                    self.log.info(f"Extensions: {', '.join(loaded_extensions)}")
         except Exception as e:
             raise e
-        self.log.debug(f"Loaded {loaded_extensions} cogs.")
+        self.log.info(f"Loaded total {total_loaded_extensions} cogs.")
