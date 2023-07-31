@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import traceback
 from typing import TYPE_CHECKING
 
@@ -13,121 +12,6 @@ if TYPE_CHECKING:
 
 
 # Terminal Commands Functions
-
-
-def add_blacklist(bot: "Bot") -> None:
-    """
-    Adds a cog to the blacklist.
-    Args:
-      bot (Bot): The bot instance.
-    Returns:
-      None
-    Side Effects:
-      Updates the config file.
-    Examples:
-      >>> add_blacklist(bot)
-    """
-    config_file = bot.config_file
-    with open(config_file, "r") as f:
-        config = json.load(f)
-
-    try:
-        edit_confirm = get_boolean_input(
-            bot, "Are you sure you want to add to the blacklist? (y/n) "
-        )
-        if not edit_confirm:
-            return
-        else:
-            cogs = list_cogs(bot)
-            bot.log.info("Choose the cog to add to the blacklist:")
-
-            cog_index = int(
-                input("Enter the number of the cog you want to blacklist: ")
-            )
-            cog_name = cogs[cog_index - 1]
-            blacklist = config.get("blacklist")
-
-            if cog_name in blacklist:
-                bot.log.warning(f"{cog_name} is already in the cog removal blacklist.")
-                return
-
-            blacklist.append(cog_name)
-
-            try:
-                new_data = {"blacklist": blacklist}
-                update_config(config_file, new_data)
-
-            except Exception as e:
-                bot.log.debug(f"Failed to update the configuration file: {e}")
-                return bot.log.warning("Failed to add to the cog removal blacklist.")
-
-            bot.log.info(f"{cog_name} has been added to the cog removal blacklist.")
-
-    except Exception as e:
-        bot.log.debug(f"Failed to add to the cog removal blacklist: {e}")
-        bot.log.warning("Failed to add to the cog removal blacklist.")
-
-
-def remove_blacklist(bot: "Bot") -> None:
-    """
-    Removes a cog from the blacklist.
-    Args:
-      bot (Bot): The bot instance.
-    Returns:
-      None
-    Side Effects:
-      Updates the config file.
-    Examples:
-      >>> remove_blacklist(bot)
-    """
-    config_file = bot.config_file
-
-    with open(config_file, "r") as f:
-        config = json.load(f)
-
-    try:
-        edit_confirm = get_boolean_input(
-            bot, "Are you sure you want to remove from the blacklist? (y/n) "
-        )
-
-        if not edit_confirm:
-            return
-        else:
-            blacklist = config.get("blacklist")
-
-            if not blacklist:
-                bot.log.warning("The cog removal blacklist is empty.")
-                return
-
-            bot.log.info("Choose the cog to remove from the blacklist:")
-
-            for i, cog_name in enumerate(blacklist):
-                bot.log.info(f"{i+1}. {cog_name}")
-
-            cog_index = int(input("Enter the number of the cog you want to remove: "))
-            cog_name = blacklist[cog_index - 1]
-
-            if cog_name not in blacklist:
-                bot.log.warning(f"{cog_name} is not in the cog removal blacklist.")
-                return
-
-            blacklist.remove(cog_name)
-
-            try:
-                new_data = {"blacklist": blacklist}
-                update_config(config_file, new_data)
-
-            except Exception as e:
-                bot.log.debug(f"Failed to update the configuration file: {e}")
-                return bot.log.warning(
-                    "Failed to remove the cog from the cog removal blacklist."
-                )
-
-            bot.log.info(f"{cog_name} has been removed from the cog removal blacklist.")
-
-    except Exception as e:
-        bot.log.debug(f"Failed to remove from the cog removal blacklist: {e}")
-        bot.log.warning("Failed to remove from the cog removal blacklist.")
 
 
 def toggle_debug_mode(bot: "Bot") -> None:
@@ -186,148 +70,6 @@ def toggle_debug_mode(bot: "Bot") -> None:
         bot.log.warning(f"An error occurred while toggling debug mode: {e}")
     else:
         bot.log.debug("Debug mode toggled successfully.")
-
-
-def remove_cogs(bot: "Bot") -> None:
-    """
-    Removes cogs from the cogs directory.
-    Args:
-      bot (Bot): The bot instance.
-    Returns:
-      None
-    Side Effects:
-      Removes cogs from the cogs directory.
-    Examples:
-      >>> remove_cogs(bot)
-    """
-    cogs_dir = bot.cogs_dir
-    config_file = bot.config_file
-
-    with open(config_file, "r") as f:
-        config = json.load(f)
-
-    bot.log.debug(f"Ignored cogs: {bot.config.get('blacklist')}")
-
-    try:
-        remove_cogs = get_boolean_input(bot, "Do you want to uninstall cogs? (y/n) ")
-        successful = False
-
-        if remove_cogs == True:
-            remove_all = get_boolean_input(
-                bot, "Do you want to uninstall all cogs at once? (y/n) "
-            )
-
-            if remove_all == True:
-                confirm_remove_all = get_boolean_input(
-                    bot, "Are you sure you want to uninstall all cogs? (y/n) "
-                )
-
-                if confirm_remove_all == True:
-                    bot.log.info("Uninstalling all cogs...")
-
-                    for file in os.listdir(cogs_dir):
-                        if file.endswith("cog.py") and file not in config.get(
-                            "blacklist"
-                        ):
-                            try:
-                                os.remove(f"{cogs_dir}/{file}")
-                                bot.log.debug(f"Removed {file} from {cogs_dir}")
-
-                            except Exception as e:
-                                bot.log.error(
-                                    f"Error occurred while removing {file}: {e}"
-                                )
-                else:
-                    bot.log.info("Cogs not uninstalled.")
-            else:
-                bot.log.info("Fetching the list of cogs from the cogs directory...")
-                files = [
-                    file
-                    for file in os.listdir(cogs_dir)
-                    if file.endswith("cog.py") and file not in config.get("blacklist")
-                ]
-                bot.log.debug(f"List of installed cogs: {files}")
-
-                for i, file in enumerate(files, start=1):
-                    bot.log.info(f"{i}. {file}")
-
-                selected_cogs = input(
-                    "Enter the numbers of the cogs you want to uninstall (separated by commas): "
-                )
-                selected_cogs = [int(num.strip()) for num in selected_cogs.split(",")]
-                confirm_removal = get_boolean_input(
-                    bot, "Are you sure you want to uninstall the selected cogs? (y/n) "
-                )
-
-                if confirm_removal == True:
-                    successful = True
-                    bot.log.info("Uninstalling selected cogs...")
-
-                    for cog_index in selected_cogs:
-                        cog_name = files[cog_index - 1]
-                        try:
-                            os.remove(f"{cogs_dir}/{cog_name}")
-                            bot.log.debug(f"Removed {cog_name} from {cogs_dir}")
-                            bot.log.info(f"{cog_name} uninstalled.")
-                        except Exception as e:
-                            bot.log.error(
-                                f"Error occurred while removing {cog_name}: {e}"
-                            )
-
-                    if successful == True:
-                        bot.log.info("Cogs uninstalled.")
-
-                    list_cogs(bot)
-                else:
-                    bot.log.info("Cogs not uninstalled.")
-
-    except FileNotFoundError:
-        bot.log.warning(f"Config file {bot.config} not found.")
-    except json.decoder.JSONDecodeError as e:
-        bot.log.warning(f"Error loading config file {bot.config}: {e}")
-    except Exception as e:
-        bot.log.error(f"Error occurred while uninstalling cogs: {e}")
-
-
-def list_cogs(bot: "Bot") -> list:
-    """
-    Lists the installed cogs.
-    Args:
-      bot (Bot): The bot instance.
-    Returns:
-      list: A list of installed cogs.
-    Examples:
-      >>> list_cogs(bot)
-      ['cog1.py', 'cog2.py', 'cog3.py']
-    """
-    cogs_dir = bot.cogs_dir
-
-    try:
-        bot.log.debug(f"Fetching list of installed cogs from directory {cogs_dir}...")
-        files = [file for file in os.listdir(cogs_dir) if file.endswith("cog.py")]
-
-        if not files:
-            bot.log.info("No cogs installed.")
-            return []
-        else:
-            bot.log.info("List of installed cogs:")
-
-            for i, file in enumerate(files, start=1):
-                bot.log.info(f"{i}. {file}")
-
-            bot.log.debug(
-                f"List of installed cogs fetched successfully from directory {cogs_dir}."
-            )
-            return files
-
-    except FileNotFoundError:
-        bot.log.error(f"The directory {cogs_dir} does not exist.")
-        return []
-    except Exception as e:
-        bot.log.error(
-            f"An error occurred while fetching the list of installed cogs: {e}"
-        )
-        return []
 
 
 def wipe_config(bot: "Bot") -> None:
@@ -566,7 +308,6 @@ async def sync_commands(bot: "Bot") -> None:
             bot.log.info("Commands not synchronized.")
 
     except Exception as e:
-        bot.log.debug(f"Error in sync_commands: {traceback.format_exc()}")
         bot.log.error(f"Error in sync_commands: {e}")
         bot.log.error("Commands not synchronized.")
 
@@ -588,7 +329,7 @@ async def set_owner(bot: "Bot") -> None:
             config = json.load(f)
 
         bot.log.info(
-            f"Current owner: {config.get('owner_name')} - {config.get('owner_id')}"
+            f"Current owner: {config.get('owner_name')}"
         )
         change_owner_name = get_boolean_input(
             bot, "Do you want to change bot owner? (y/n) "
@@ -596,13 +337,11 @@ async def set_owner(bot: "Bot") -> None:
 
         if change_owner_name == True:
             new_owner_name = input("Enter new owner name: ")
-            new_owner_id = input("Enter new owner id: ")
 
             try:
                 new_data = {
                     "update_bot": True,
                     "owner_name": new_owner_name,
-                    "owner_id": new_owner_id,
                 }
                 update_config(config_file, new_data)
 
@@ -615,17 +354,59 @@ async def set_owner(bot: "Bot") -> None:
                     config.get("owner_name"), new_owner_name
                 )
             )
-            bot.log.info(
-                "Config change, owner_id: {} -> {}".format(
-                    config.get("owner_id"), new_owner_id
-                )
-            )
         else:
             bot.log.info("Owner not changed.")
 
     except Exception as e:
-        bot.log.debug(f"Error in set_owner function: {e}")
         bot.log.error(f"Error in set_owner function: {e}")
+
+
+async def set_persona(bot: "Bot") -> None:
+    """
+    Sets the persona of the bot.
+    Args:
+      bot (Bot): The bot instance.
+    Returns:
+      None
+    Examples:
+      >>> await set_persona(bot)
+    """
+    try:
+        config_file = bot.config_file
+
+        with open(config_file, "r") as f:
+            config = json.load(f)
+
+        bot.log.info(
+            f"Current persona: {config.get('persona')}"
+        )
+        change_persona = get_boolean_input(
+            bot, "Do you want to change bot persona? (y/n) "
+        )
+
+        if change_persona == True:
+            new_persona = input("Enter new persona name: ")
+
+            try:
+                new_data = {
+                    "persona": new_persona,
+                }
+                update_config(config_file, new_data)
+
+            except Exception as e:
+                bot.log.debug(f"Failed to update the configuration file: {e}")
+                return bot.log.warning("Failed to set update flag.")
+
+            bot.log.info(
+                "Config change, persona: {} -> {}".format(
+                    config.get("persona"), new_persona
+                )
+            )
+        else:
+            bot.log.info("Persona not changed.")
+
+    except Exception as e:
+        bot.log.error(f"Error in set_persona function: {e}")
 
 
 def show_help(bot: "Bot") -> None:
@@ -652,15 +433,11 @@ def show_help(bot: "Bot") -> None:
         "setpresence": "Changes the current Bot presence.",
         "setavatar": "Changes the current Bot avatar.",
         "setowner": "Sets the owner of the bot.",
+        "setpersona": "Sets the persona of the bot.",
         "reload": "Synchronizes commands with Discord.",
         "wipebot": 'Wipes the bot"s configuration files.',
-        "getcogs": "Downloads and loads cogs.",
-        "removecog": "Removes cogs from the bot.",
-        "listcogs": "Lists all cogs currently loaded.",
         "aliases": "Lists all command aliases.",
         "debug": "Toggles debug mode.",
-        "addblacklist": "Adds a cog to the blacklist.",
-        "removeblacklist": "Removes a cog from the blacklist.",
     }
 
     try:
@@ -715,15 +492,11 @@ def show_aliases(bot: "Bot") -> None:
         "setpresence": ["setbotpres", "sbp"],
         "setavatar": ["setava", "sba"],
         "setowner": ["setown"],
+        "setpersona": ["setper", "persona", "sp"],
         "reload": ["sync", "r"],
         "wipebot": ["wipeconfig", "wipe", "wb"],
-        "getcogs": ["getcogs", "gc"],
-        "removecog": ["removecogs", "rc"],
-        "listcogs": ["list", "lc"],
         "alias": ["aliases", "a"],
         "debug": ["d"],
-        "addblacklist": ["addbl", "abl"],
-        "removeblacklist": ["rmblist", "rmbl"],
     }
 
     try:

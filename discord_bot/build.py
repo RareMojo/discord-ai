@@ -6,7 +6,7 @@ from discord import Intents
 
 from discord_bot.bot import Bot
 from discord_bot.logger import Logger
-from utils.tools import download_cogs, get_new_config
+from utils.tools import get_new_config
 
 
 class BuildBot(Bot):
@@ -86,18 +86,6 @@ class BuildBot(Bot):
                 os.mkdir(cogs_dir)
             else:
                 self.log.debug("Cogs directory found.")
-
-                update = config.get("update_bot", False)
-
-                if update:
-                    self.log.debug("Updating cogs...")
-                    download_cogs(
-                        self,
-                        config["cog_repo"]["repo_owner"],
-                        config["cog_repo"]["repo_name"],
-                        config["cog_repo"]["repo_info"],
-                    )
-                    self.log.info("Cogs updated.")
 
         except FileNotFoundError as e:
             self.log.error("Cogs directory not found.", e)
