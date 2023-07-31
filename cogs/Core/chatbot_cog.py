@@ -52,7 +52,7 @@ class ChatbotCog(
         """Called when a thread is created."""
         time.sleep(0.25)
         persona = self.bot.config.get("persona")
-        # 
+
         if thread.parent.id == self.bot.chatbot_threads_id:
             reply = (
                 f"Hello {thread.owner.mention}, please stay in this thread. "

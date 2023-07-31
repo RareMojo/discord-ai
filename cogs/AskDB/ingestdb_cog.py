@@ -20,7 +20,7 @@ handler = MongoDBHandler("database")
 
 class IngestDBCog(commands.Cog):
     """
-    Cog for ingesting documentation URLs.
+    Cog for ingesting URLs.
     """
 
     def __init__(self, bot: "Bot"):
@@ -34,11 +34,11 @@ class IngestDBCog(commands.Cog):
     @commands.hybrid_command()
     async def ingestdb(self, ctx: commands.Context, url: str, db_name: str):
         """
-        Ingests a documentation URL.
+        Ingests a URL.
         Args:
           ctx (commands.Context): The context of the command.
-          url (str): The URL of the documentation to ingest.
-          db_name (str): The name of the documentation.
+          url (str): The URL to ingest.
+          db_name (str): The name of the db.
         Returns:
           discord.Embed: An embed containing the result of the ingestion.
         Examples:
@@ -56,7 +56,7 @@ class IngestDBCog(commands.Cog):
             try:
                 random_uuid = str(uuid.uuid4())
                 embed = discord.Embed(
-                    title="Ingesting Documentation URL",
+                    title="Ingesting URL",
                     type="rich",
                     description=f"\n *This might take a while*",
                     color=embed_color,
@@ -77,7 +77,7 @@ class IngestDBCog(commands.Cog):
                 )
                 embed = discord.Embed(
                     title="Success",
-                    description=f"{url}\n**db Name:** `{db_name}`\n**db ID:** `{random_uuid}`",
+                    description=f"{url}\n**DB Name:** `{db_name}`\n**DB ID:** `{random_uuid}`",
                     timestamp=current_time,
                     color=embed_color,
                 )

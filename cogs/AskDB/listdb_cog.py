@@ -52,7 +52,7 @@ class ListDBCog(commands.Cog):
         db_list = handler.list_db(user_id=str(ctx.author.id))
         embed = discord.Embed(title="db", color=embed_color)
         try:
-            log_debug(self.bot, f"Listing db for user: {ctx.author.id}")
+            log_debug(self.bot, f"Listing DBs: {ctx.author.id}")
             for db in db_list:
                 db_name = db["db_name"]
                 db_id = db["db_id"]
@@ -60,11 +60,11 @@ class ListDBCog(commands.Cog):
                 ingested_time = db["ingested_time"]
                 embed.add_field(
                     name=db_name,
-                    value=f"{ingested_url}\n**ID:** `{db_id}`\n**Time:** `{ingested_time}`",
+                    value=f"{ingested_url}\n**DB ID:** `{db_id}`\n**Time Ingested:** `{ingested_time}`",
                     inline=False,
                 )
         except Exception as e:
-            embed.add_field(name="Error", value="No db Found", inline=True)
+            embed.add_field(name="Error", value="No DB Found", inline=True)
             log_error(self.bot, e)
         await ctx.send(embed=embed)
 

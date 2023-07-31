@@ -51,7 +51,7 @@ class HelpDBCog(commands.Cog):
             return
         log_debug(self.bot, f"Helpdb command used by user: {ctx.author.id}")
         await ctx.defer(ephemeral=True)
-        embed = discord.Embed(title="Chatbot db Help", color=embed_color)
+        embed = discord.Embed(title="Chatbot DB Help", color=embed_color)
         embed.set_author(
             name="GitHub [Click Here]",
             url="https://github.com/AntonOsika/gpt-engineer",

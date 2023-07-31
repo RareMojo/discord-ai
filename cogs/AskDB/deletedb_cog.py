@@ -50,15 +50,15 @@ class DeleteDBCog(commands.Cog):
             )
             return
         await ctx.defer()
-        embed = discord.Embed(title="Delete db", color=embed_color)
+        embed = discord.Embed(title="Delete DB", color=embed_color)
         try:
-            log_debug(self.bot, f"Deleting db with ID: {db_id}")
+            log_debug(self.bot, f"Deleting DB with ID: {db_id}")
             user_id = str(ctx.author.id)
             db_name = handler.get_db_name(user_id=user_id, db_id=db_id)
             r = handler.delete_db(user_id=user_id, db_id=db_id)
             embed.add_field(
                 name="Status",
-                value=f"Successfully deleted!\n**db name:** `{db_name}`\n**db ID:** `{db_id}`",
+                value=f"Successfully deleted!\n**DB name:** `{db_name}`\n**DB ID:** `{db_id}`",
                 inline=True,
             )
         except ValueError as e:
