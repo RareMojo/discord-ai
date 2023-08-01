@@ -8,9 +8,14 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
 
+
+embed_color_pending = 0xFD7C42
+embed_color_success = discord.Color.brand_green()
+embed_color_failure = discord.Color.brand_red()
+
 sys.path.append("../")
-handler = MongoDBHandler("database")
-embed_color = discord.Color.brand_green()
+handler = MongoDBHandler("askdb")
+
 
 
 class HelpDBCog(commands.Cog):
@@ -44,14 +49,11 @@ class HelpDBCog(commands.Cog):
         """
         channel = ctx.channel
         if channel.category.id != self.bot.chatbot_category_id:
-            await ctx.send(
-                "Please use this command in the 'AI' text-chat category.",
-                ephemeral=True,
-            )
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="Please use this command in the 'AI' text-chat category."), ephemeral=True)
             return
-        log_debug(self.bot, f"Helpdb command used by user: {ctx.author.id}")
         await ctx.defer(ephemeral=True)
-        embed = discord.Embed(title="Chatbot DB Help", color=embed_color)
+        log_debug(self.bot, f"Helpdb command used by user: {ctx.author.id}")
+        embed = discord.Embed(title="Chatbot DB Help", color=embed_color_success)
         embed.set_author(
             name="GitHub [Click Here]",
             url="https://github.com/AntonOsika/gpt-engineer",
@@ -60,22 +62,22 @@ class HelpDBCog(commands.Cog):
         embed.add_field(name="/helpdb", value="This help message.", inline=True)
         embed.add_field(
             name="/ingestdb",
-            value="Ingest a readthedb.io documentation website.",
+            value="Ingest a readthedocs.io URL as a DB ID.",
             inline=True,
         )
         embed.add_field(
             name="/listdb",
-            value="View a list of your ingested documentation websites.",
+            value="View a list of your ingested DB IDs.",
             inline=True,
         )
         embed.add_field(
             name="/deletedb",
-            value="Delete an ingested documentation website from the list.",
+            value="Delete an ingested DB ID from the list.",
             inline=True,
         )
         embed.add_field(
             name="/askdb",
-            value="Ask about an ingested documentation website.",
+            value="Ask about an ingested DB ID.",
             inline=True,
         )
         await ctx.send(embed=embed, ephemeral=True)

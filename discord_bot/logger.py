@@ -50,7 +50,7 @@ class Logger(logging.Logger):
         """Sets up the Logger class"""
         self.log_file = log_file
         self.name = name
-        self.level = level  # type: ignore
+        self.level = level
         self.maxBytes = maxBytes
         self.backupCount = backupCount
         self.setup_logger()
@@ -91,7 +91,7 @@ class LoggerFormat(logging.Formatter):
     Examples:
       >>> formatter = LoggerFormat()
       >>> formatter.format(logging.LogRecord('my_logger', logging.INFO, 'my_message'))
-      '(black)2020-09-09 12:00:00(reset) (levelcolor)INFO     (black)[(reset)(purple)GPT-Engineer-Bot(black)] >(reset) my_message'
+      '(black)2020-09-09 12:00:00(reset) (levelcolor)INFO     (black)[(reset)(purple)discord-ai(black)] >(reset) my_message'
     """
 
     black = "\x1b[30m"
@@ -122,10 +122,10 @@ class LoggerFormat(logging.Formatter):
         Examples:
           >>> formatter = LoggerFormat()
           >>> formatter.format(logging.LogRecord('my_logger', logging.INFO, 'my_message'))
-          '(black)2020-09-09 12:00:00(reset) (levelcolor)INFO     (black)[(reset)(purple)GPT-Engineer-Bot(black)] >(reset) my_message'
+          '(black)2020-09-09 12:00:00(reset) (levelcolor)INFO     (black)[(reset)(purple)discord-ai(black)] >(reset) my_message'
         """
         log_color = self.COLORS[record.levelno]
-        format = "(black){asctime}(reset) (levelcolor){levelname: <8}(black)[(reset)(purple)GPT-Engineer-Bot(black)] >(reset) {message}"
+        format = "(black){asctime}(reset) (levelcolor){levelname: <8}(black)[(reset)(purple)discord-ai(black)] >(reset) {message}"
         format = format.replace("(black)", self.black + self.bold)
         format = format.replace("(reset)", self.reset)
         format = format.replace("(gray)", self.gray + self.bold)
@@ -202,8 +202,6 @@ class LoggerRotator(RotatingFileHandler):
         except Exception:
             self.handleError(record)
 
-
-# Extra logging functions
 
 def log_debug(bot: "Bot", message: str) -> None:
     """

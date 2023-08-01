@@ -10,14 +10,19 @@ from discord_bot.logger import log_debug, log_error, log_info
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
 
+
+embed_color_pending = 0xFD7C42
+embed_color_success = discord.Color.brand_green()
+embed_color_failure = discord.Color.brand_red()
+
 sys.path.append("../")
-handler = MongoDBHandler("database")
-embed_color = 0xFD7C42
+handler = MongoDBHandler("askdb")
+
 
 
 class DeleteDBCog(commands.Cog):
     """
-    Cog for deleting dbs.
+    Cog for deleting DBs.
     """
 
     def __init__(self, bot: "Bot"):
@@ -31,40 +36,54 @@ class DeleteDBCog(commands.Cog):
     @commands.hybrid_command()
     async def deletedb(self, ctx: commands.Context, db_id: str):
         """
-        Deletes a db with the given ID.
+        Deletes a DB with the given ID.
         Args:
-          ctx (commands.Context): The context of the command.
-          db_id (str): The ID of the db to delete.
+        ctx (commands.Context): The context of the command.
+        db_id (str): The ID of the DB to delete.
         Returns:
-          None
+        None
         Examples:
-          >>> deletedb("12345")
-          Successfully deleted!
-          db name: <db_name>
-          db ID: 12345
+        >>> deletedb("12345")
+        Successfully deleted!
+        db name: <db_name>
+        db ID: 12345
         """
         channel = ctx.channel
-        if channel.category.id != self.bot.chatbot_category_id:
-            await ctx.send(
-                "Please use this command in the chatbot category.", ephemeral=True
-            )
+        allowed_roles = ["Contributor", "Moderator", "Administrator", "Developer", "Head Developer", "Super Admin", "BOT"]
+        author_roles = [role.name for role in ctx.author.roles]
+        
+        if not any(role in allowed_roles for role in author_roles):
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="You do not have permission to use this command."), ephemeral=True)
             return
-        await ctx.defer()
-        embed = discord.Embed(title="Delete DB", color=embed_color)
-        try:
-            log_debug(self.bot, f"Deleting DB with ID: {db_id}")
-            user_id = str(ctx.author.id)
+        
+        if channel.category.id != self.bot.chatbot_category_id:
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="Please use this command in the 'AI' text-chat category."), ephemeral=True)
+            return
+
+        if not handler.check_exists(db_id=db_id):
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="The DB ID you provided does not exist."), ephemeral=True)
+            return
+        await ctx.defer(ephemeral=True)
+        user_id = str(ctx.author.id)
+        r = handler.delete_db(user_id=user_id, db_id=db_id)
+        if r:
             db_name = handler.get_db_name(user_id=user_id, db_id=db_id)
-            r = handler.delete_db(user_id=user_id, db_id=db_id)
+            log_debug(self.bot, f"Successfully deleted DB with ID: {db_id}")
+            embed = discord.Embed(title="Status", color=embed_color_success)
             embed.add_field(
                 name="Status",
                 value=f"Successfully deleted!\n**DB name:** `{db_name}`\n**DB ID:** `{db_id}`",
                 inline=True,
             )
-        except ValueError as e:
-            embed.add_field(name="Error", value=str(e), inline=True)
-            log_error(self.bot, e)
-        await ctx.send(embed=[embed])
+        else:
+            log_debug(self.bot, f"DB with ID {db_id} not found.")
+            embed = discord.Embed(title="Error", color=embed_color_failure)
+            embed.add_field(
+                name="Error",
+                value=f"DB with ID {db_id} not found. No action was taken.",
+                inline=True,
+            )
+        await ctx.send(embed=embed)
 
 
 async def setup(bot: "Bot") -> None:

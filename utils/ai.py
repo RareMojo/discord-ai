@@ -24,7 +24,7 @@ class ChatAgent:
     A class for managing a conversation with a bot.
     """
 
-    def __init__(self, bot: "Bot", channel_id, temperature=0, return_messages=True):
+    def __init__(self, bot: "Bot", channel_id: str, temperature: float=0, return_messages: bool=True):
         """
         Initializes a ChatAgent instance.
         Args:
@@ -63,7 +63,7 @@ class ChatAgent:
             memory=memory, prompt=self.prompt, llm=self.llm, verbose=True
         )
 
-    def predict(self, prompt):
+    def predict(self, prompt: str):
         """
         Predicts a response to a prompt.
         Args:
@@ -83,7 +83,7 @@ class ChatQuery:
     Class for creating a query for a chatbot.
     """
 
-    def __init__(self, bot: "Bot", namespace):
+    def __init__(self, bot: "Bot", namespace: str):
         """
         Initializes the ChatQuery class.
         Args:

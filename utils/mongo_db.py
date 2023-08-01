@@ -2,12 +2,13 @@ from pymongo import MongoClient
 import os
 
 
+
 class MongoDBHandler:
     """
     Handles data for a MongoDB database.
     """
 
-    def __init__(self, database_name):
+    def __init__(self, database_name: str):
         """
         Initializes the MongoDBHandler class.
         Args:
@@ -49,7 +50,7 @@ class MongoDBHandler:
         }
         user_collection.update_one({"user_id": user_id}, {"$push": {"data": data}})
 
-    def list_db(self, user_id):
+    def list_db(self, user_id: str):
         """
         Lists all documents for a user.
         Args:
@@ -80,8 +81,35 @@ class MongoDBHandler:
                 return "You have no db"
         else:
             return "User not found"
+          
+    def list_all_db(self):
+      """
+      Lists all documents for all users.
+      Returns:
+        list: A list of all documents.
+      Examples:
+        >>> list_all_db()
+        [{'db_name': 'doc1', 'db_id': '456', 'ingested_url': 'www.example.com', 'ingested_time': '2020-01-01', 'user_id': '123'}, {'db_name': 'doc2', 'db_id': '789', 'ingested_url': 'www.example.com', 'ingested_time': '2020-01-02', 'user_id': '123'}, ...]
+      """
+      user_collection = self.db["users"]
+      all_db = []
+      for user in user_collection.find():
+          for entry in user["data"]:
+              db_data = {
+                  "db_name": entry["db"]["db_name"],
+                  "db_id": entry["db"]["db_id"],
+                  "ingested_url": entry["db"]["ingested_url"],
+                  "ingested_time": entry["db"]["ingested_time"],
+                  "user_id": user["user_id"],  # include the user_id in the returned data
+              }
+              all_db.append(db_data)
 
-    def delete_db(self, user_id, db_id):
+      if all_db:
+          return all_db
+      else:
+          return "No DB found"
+
+    def delete_db(self, user_id: str, db_id: str):
         """
         Deletes a document for a user.
         Args:
@@ -89,8 +117,6 @@ class MongoDBHandler:
           db_id (str): The ID of the document.
         Returns:
           bool: True if the document was deleted, False otherwise.
-        Raises:
-          ValueError: If the document with the given ID is not found.
         Examples:
           >>> delete_db('123', '456')
           True
@@ -104,9 +130,10 @@ class MongoDBHandler:
         if result.modified_count > 0:
             return True
         else:
-            raise ValueError(f"db with ID {db_id} not found.")
+            return False
 
-    def get_db_name(self, user_id, db_id):
+
+    def get_db_name(self, user_id: str, db_id: str):
         """
         Gets the name of a document for a user.
         Args:
@@ -134,27 +161,18 @@ class MongoDBHandler:
         else:
             raise ValueError("No user found with the provided db ID.")
 
-    def check_ownership(self, user_id, db_id):
+    def check_exists(self, db_id: str):
         """
-        Checks if a user owns a document.
+        Checks if a db exists for any user.
         Args:
-          user_id (str): The ID of the user.
           db_id (str): The ID of the document.
         Returns:
-          bool: True if the user owns the document, False otherwise.
+          bool: True if the document exists, False otherwise.
         Examples:
-          >>> check_ownership('123', '456')
+          >>> check_exists('456')
           True
         """
         user_collection = self.db["users"]
-        user = user_collection.find_one(
-            {"user_id": user_id, "data.db.db_id": db_id}
-        )
+        user = user_collection.find_one({"data": { "$elemMatch": { "db.db_id": db_id } } })
 
-        if user:
-            for entry in user["data"]:
-                if entry["db"]["db_id"] == db_id:
-                    return True
-            return False
-        else:
-            return False
+        return user is not None

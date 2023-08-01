@@ -10,12 +10,17 @@ from utils.ingest import ingest
 from utils.mongo_db import MongoDBHandler
 from discord_bot.logger import log_debug, log_error, log_info
 
+from urllib.parse import urlparse
+
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
 
-embed_color = 0xFD7C42
+embed_color_pending = 0xFD7C42
+embed_color_success = discord.Color.brand_green()
+embed_color_failure = discord.Color.brand_red()
+
 sys.path.append("../")
-handler = MongoDBHandler("database")
+handler = MongoDBHandler("askdb")
 
 
 class IngestDBCog(commands.Cog):
@@ -36,22 +41,32 @@ class IngestDBCog(commands.Cog):
         """
         Ingests a URL.
         Args:
-          ctx (commands.Context): The context of the command.
-          url (str): The URL to ingest.
-          db_name (str): The name of the db.
+        ctx (commands.Context): The context of the command.
+        url (str): The URL to ingest.
+        db_name (str): The name of the db.
         Returns:
-          discord.Embed: An embed containing the result of the ingestion.
+        discord.Embed: An embed containing the result of the ingestion.
         Examples:
-          >>> await ctx.send(embed=await ingestdb(ctx, 'https://example.com', 'Example db'))
-          Embed containing the result of the ingestion.
+        >>> await ctx.send(embed=await ingestdb(ctx, 'https://example.com', 'Example db'))
+        Embed containing the result of the ingestion.
         """
         channel = ctx.channel
-        if channel.category.id != self.bot.chatbot_category_id:
-            await ctx.send(
-                "Please use this command in the chatbot category.", ephemeral=True
-            )
+        allowed_roles = ["Contributor", "Moderator", "Administrator", "Developer", "Head Developer", "Super Admin", "BOT"]
+        author_roles = [role.name for role in ctx.author.roles]
+        
+        if not any(role in allowed_roles for role in author_roles):
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="You do not have permission to use this command."), ephemeral=True)
             return
-        await ctx.defer()
+        
+        if channel.category.id != self.bot.chatbot_category_id:
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="Please use this command in the 'AI' text-chat category."), ephemeral=True)
+            return
+
+        parsed_url = urlparse(url)
+        if not parsed_url.netloc.endswith('readthedocs.io'):
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="The URL you provided is not a ReadTheDocs URL."), ephemeral=True)
+            return
+        await ctx.defer(ephemeral=True)
         try:
             try:
                 random_uuid = str(uuid.uuid4())
@@ -59,7 +74,7 @@ class IngestDBCog(commands.Cog):
                     title="Ingesting URL",
                     type="rich",
                     description=f"\n *This might take a while*",
-                    color=embed_color,
+                    color=embed_color_pending,
                 )
                 await ctx.send(embed=embed, ephemeral=True)
                 log_debug(
@@ -79,7 +94,7 @@ class IngestDBCog(commands.Cog):
                     title="Success",
                     description=f"{url}\n**DB Name:** `{db_name}`\n**DB ID:** `{random_uuid}`",
                     timestamp=current_time,
-                    color=embed_color,
+                    color=embed_color_success,
                 )
                 await ctx.send(embed=embed, ephemeral=True)
             except Exception as e:
@@ -88,7 +103,7 @@ class IngestDBCog(commands.Cog):
                     f"Error ingesting {url} as {db_name} for {ctx.author.name}: {e}",
                 )
                 embed = discord.Embed(
-                    title="Error", description=f"Error: {e}", color=embed_color
+                    title="Error", description=f"Error: {e}", color=embed_color_failure
                 )
             else:
                 pass
@@ -98,7 +113,7 @@ class IngestDBCog(commands.Cog):
                 f"Error ingesting {url} as {db_name} for {ctx.author.name}: {e}",
             )
             embed = discord.Embed(
-                title="Error", description=f"Error: {e}", color=embed_color
+                title="Error", description=f"Error: {e}", color=embed_color_failure
             )
             await ctx.send(embed=embed, ephemeral=True)
 

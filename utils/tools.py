@@ -1,15 +1,9 @@
-import csv
 import json
-import os
 import re
-import shutil
-import subprocess
-import tempfile
 import traceback
-from pathlib import Path
 from typing import TYPE_CHECKING
+
 import discord
-import requests
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
@@ -145,12 +139,9 @@ async def update_with_discord(bot: "Bot") -> None:
         try:
             with open(bot.avatar_file, "rb") as f:
                 new_avatar = f.read()
-                await bot.user.edit(avatar=new_avatar)  # type: ignore
-            activity = discord.Activity(
-                type=discord.ActivityType.watching, name=presence
-            )
-            await bot.user.edit(username=bot_name)  # type: ignore
-            await bot.change_presence(status=discord.Status.online, activity=activity)
+                await bot.user.edit(avatar=new_avatar)
+            await bot.user.edit(username=bot_name)
+            await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=presence))
 
         except Exception as e:
             bot.log.error("Error: {}".format(e))
@@ -323,12 +314,10 @@ def split_chat(chat, max_chars=2000):
 
         if inside_code_block:
             if len(chunk) + len(line) + 1 > max_chars:
-                # Add the end delimiter for the current code block
                 chunk += "```\n"
                 add_chunk(chunk)
                 chunk = ""
 
-                # Start a new chunk with the correct language identifier
                 chunk += f"```{language}\n"
             chunk += line + "\n"
         else:

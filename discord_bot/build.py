@@ -66,7 +66,7 @@ class BuildBot(Bot):
         reset = "\033[0m"
         self.log.info("\n" + green + text_logo + reset + "\n")
 
-    def __setup_cogs__(self, config: dict, cogs_dir: Path):
+    def __setup_cogs__(self, cogs_dir: Path):
         """
         Sets up the cogs for the bot.
         Args:
@@ -133,8 +133,9 @@ class BuildBot(Bot):
 
         with open(self.config_file, "r") as f:
             self.config = json.load(f)
+            
         self.__setup_logger__(self.config)
-        self.__setup_cogs__(self.config, self.cogs_dir)
+        self.__setup_cogs__(self.cogs_dir)
 
         self.log.info("Building bot...")
         intents = Intents.default()

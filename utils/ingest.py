@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from discord_bot.bot import Bot
 
 
-async def download_file(bot: "Bot", session, url, output_directory):
+async def download_file(bot: "Bot", session: aiohttp.ClientSession, url: str, output_directory: str):
     """
     Downloads a file from a given URL.
     Args:
@@ -41,7 +41,7 @@ async def download_file(bot: "Bot", session, url, output_directory):
             log_error(bot, f"Failed to download: {url}")
 
 
-async def ingest(bot: "Bot", url, namespace):
+async def ingest(bot: "Bot", url: str, namespace: str):
     """
     Ingests documents from a given URL into Pinecone.
     Args:

@@ -4,21 +4,18 @@ from pathlib import Path
 from discord_bot.build import BuildBot
 from utils.tools import make_filepaths
 
-#              __
-#             /\ \__                                 __
-#   __   _____\ \ ,_\             __    ___      __ /\_\    ___      __     __   _ __
-# /'_ `\/\ '__`\ \ \/  _______  /'__`\/' _ `\  /'_ `\/\ \ /' _ `\  /'__`\ /'__`\/\`'__\
-# /\ \L\ \ \ \L\ \ \ \_/\______\/\  __//\ \/\ \/\ \L\ \ \ \/\ \/\ \/\  __//\  __/\ \ \/
-# \ \____ \ \ ,__/\ \__\/______/\ \____\ \_\ \_\ \____ \ \_\ \_\ \_\ \____\ \____\\ \_\
-# \/___L\ \ \ \/  \/__/         \/____/\/_/\/_/\/___L\ \/_/\/_/\/_/\/____/\/____/ \/_/
-#   /\____/\ \_\                                 /\____/
-#   \_/__/  \/_/                                 \_/__/
+#   __                                             __                               
+#  /\ \     __                                    /\ \                        __    
+#  \_\ \   /\_\     ____    ___     ___    _ __   \_\ \               __     /\_\   
+#  /'_` \  \/\ \   /',__\  /'___\  / __`\ /\`'__\ /'_` \   _______  /'__`\   \/\ \  
+# /\ \L\ \  \ \ \ /\__, `\/\ \__/ /\ \L\ \\ \ \/ /\ \L\ \ /\______\/\ \L\.\_  \ \ \ 
+# \ \___,_\  \ \_\\/\____/\ \____\\ \____/ \ \_\ \ \___,_\\/______/\ \__/.\_\  \ \_\
+#  \/__,_ /   \/_/ \/___/  \/____/ \/___/   \/_/  \/__,_ /          \/__/\/_/   \/_/
+#                                                                                                                                                                                                                                                                                                                                
 #
-#
-#
-# gpt-engineer-discordbot: A basic Discord bot written in Python with LangChain and ChatGPT integration.
-# This bot is to serve all users and developers at the gpt-engineer project discord.
-# Thanks and have fun yall!
+# discord-ai: A Discord bot written in Python with LangChain and ChatGPT integration.
+# This bot's primary objective in life is to assist in fulfilling gpt-engineering's mission.
+# Thanks and have fun yall! -RareMojo
 
 
 def launch_bot():

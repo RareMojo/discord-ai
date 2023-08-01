@@ -1,4 +1,3 @@
-import os
 import sys
 from typing import TYPE_CHECKING
 
@@ -12,9 +11,15 @@ from discord_bot.logger import log_debug, log_error, log_info
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
 
+
+embed_color_pending = 0xFD7C42
+embed_color_success = discord.Color.brand_green()
+embed_color_failure = discord.Color.brand_red()
+embed_color_chat = discord.Color.blurple()
+
 sys.path.append("../")
-handler = MongoDBHandler("database")
-embed_color = discord.Color.blurple()
+handler = MongoDBHandler("askdb")
+
 
 
 class AskDB(commands.Cog):
@@ -35,28 +40,29 @@ class AskDB(commands.Cog):
         self,
         ctx: commands.Context,
         query: str,
-        db_id: str = "2349f359-9c6e-4436-b707-af6492ddd2d7", # default to the db_id of gpt-engineer
-        source: bool = False,
-    ):  
+        db_id: str = "ba8e1813-627c-4c82-9de3-c3cfeef3d6f3",  # default to the db_id of gpt-engineer
+    ):
         """
         Queries documents for a given query.
         Args:
-          ctx (commands.Context): The context of the command.
-          query (str): The query to search for.
-          db_id (str): The ID of the documents to search.
+        ctx (commands.Context): The context of the command.
+        query (str): The query to search for.
+        db_id (str): The DB ID of the documents to search.
         Returns:
-          discord.Embed: An embed containing the query results.
+        discord.Embed: An embed containing the query results.
         Examples:
-          >>> await ctx.send(embed=askdb("What is GPT-Engineer?", "2349f359-9c6e-4436-b707-af6492ddd2d7"))
-          Embed containing query results.
+        >>> await ctx.send(embed=askdb("What is GPT-Engineer?", "2349f359-9c6e-4436-b707-af6492ddd2d7"))
+        Embed containing query results.
         """
         channel = ctx.channel
         if channel.category.id != self.bot.chatbot_category_id:
-            await ctx.send(
-                "Please use this command in the chatbot category.", ephemeral=True
-            )
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="Please use this command in the 'AI' text-chat category."), ephemeral=True)
             return
-        await ctx.defer(ephemeral=False)
+
+        if not handler.check_exists(db_id=db_id):
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="The DB ID you provided does not exist."), ephemeral=True)
+            return
+        await ctx.defer(ephemeral=True)
         chat_history = []
         log_debug(self.bot, f"Query: {query}")
         try:
@@ -87,27 +93,16 @@ class AskDB(commands.Cog):
                 }
                 parsed_documents.append(parsed_doc)
             embed = discord.Embed(
-                title="Query Results:",
+                title="AskDB Results:",
                 description=f'{result["answer"]}\n\n',
-                color=embed_color,
+                color=embed_color_chat,
             )
 
-            if source == True:
-                for i, doc in enumerate(parsed_documents, start=1):
-                    source = doc['metadata']['source']
-                    source_name = os.path.basename(source)
-                    embed.add_field(
-                        name=f"Source {i}", value=f'{source_name}', inline=True)
-
-                source_count = len(parsed_documents)
-                embed.set_footer(text=f"Total Sources: {source_count}")
-            else:
-                embed.add_field(name="Query:", value=f"**{query}**", inline=False)
-                await ctx.send(embed=embed)
+            embed.add_field(name="Prompt:", value=f"**{query}**", inline=False)
         except Exception as e:
-            await ctx.send(f"Error: {e}", ephemeral=False)
-            log_error(self.bot, f"Error: {e}")
-
+            log_error(self.bot, f"Error querying the DB: {e}")
+            embed = discord.Embed(title="Error", color=embed_color_failure, description="An error occurred while querying the DB.")
+        await ctx.send(embed=embed, ephemeral=True)
 
 async def setup(bot: "Bot") -> None:
     """Loads the cog."""

@@ -156,7 +156,7 @@ async def set_bot_name(bot: "Bot") -> None:
             new_name = input("Enter new bot name: ")
 
             try:
-                await bot.user.edit(username=new_name)  # type: ignore
+                await bot.user.edit(username=new_name)
                 bot.log.info(
                     "Config change, bot_name: {} -> {}".format(
                         config.get("bot_name"), new_name
@@ -204,7 +204,7 @@ async def set_bot_avatar(bot: "Bot") -> None:
 
         if change_avatar == True:
             try:
-                await bot.user.edit(avatar=new_avatar)  # type: ignore
+                await bot.user.edit(avatar=new_avatar)
             except Exception as e:
                 bot.log.error("Error: {}".format(e))
                 bot.log.warning("Avatar not changed on Discord servers.")
@@ -260,7 +260,6 @@ async def set_bot_presence(bot: "Bot") -> None:
                 return bot.log.warning("Failed to set update flag.")
 
             try:
-                # Try to change the presence on Discord servers.
                 await bot.change_presence(activity=discord.Game(name=new_presence))
                 bot.log.info(
                     "Config change, presence: {} -> {}".format(

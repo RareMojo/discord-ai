@@ -1,20 +1,11 @@
 import asyncio
 from typing import TYPE_CHECKING
 
-from discord_bot.terminal_cmds import (
-    exit_bot_terminal,
-    ping,
-    set_bot_avatar,
-    set_bot_name,
-    set_bot_presence,
-    set_owner,
-    set_persona,
-    show_aliases,
-    show_help,
-    sync_commands,
-    toggle_debug_mode,
-    wipe_config,
-)
+from discord_bot.terminal_cmds import (exit_bot_terminal, ping, set_bot_avatar,
+                                       set_bot_name, set_bot_presence,
+                                       set_owner, set_persona, show_aliases,
+                                       show_help, sync_commands,
+                                       toggle_debug_mode, wipe_config)
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
@@ -34,7 +25,6 @@ async def terminal_command_loop(bot: "Bot"):
     bot_name = bot.config.get("bot_name")
     loop = asyncio.get_event_loop()
     delay = 0.25
-    launch_delay = 3.5
     black = "\x1b[30m"
     red = "\x1b[31m"
     purple = "\x1b[35m"
@@ -44,9 +34,6 @@ async def terminal_command_loop(bot: "Bot"):
     gray = "\x1b[38m"
     reset = "\x1b[0m"
     bold = "\x1b[1m"
-
-    if bot.running:
-        await asyncio.sleep(launch_delay)
 
     while bot.running:
         await asyncio.sleep(delay)
