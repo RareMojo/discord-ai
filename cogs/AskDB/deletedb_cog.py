@@ -32,7 +32,7 @@ class DeleteDBCog(commands.Cog):
           bot (Bot): The bot instance.
         """
         self.bot = bot
-
+            
     @commands.hybrid_command()
     async def deletedb(self, ctx: commands.Context, db_id: str):
         """
@@ -63,11 +63,12 @@ class DeleteDBCog(commands.Cog):
         if not handler.check_exists(db_id=db_id):
             await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="The DB ID you provided does not exist."), ephemeral=True)
             return
+        
         await ctx.defer(ephemeral=True)
         user_id = str(ctx.author.id)
+        db_name = handler.get_db_name(user_id=user_id, db_id=db_id)
         r = handler.delete_db(user_id=user_id, db_id=db_id)
-        if r:
-            db_name = handler.get_db_name(user_id=user_id, db_id=db_id)
+        if r is True:
             log_debug(self.bot, f"Successfully deleted DB with ID: {db_id}")
             embed = discord.Embed(title="Status", color=embed_color_success)
             embed.add_field(
@@ -75,15 +76,11 @@ class DeleteDBCog(commands.Cog):
                 value=f"Successfully deleted!\n**DB name:** `{db_name}`\n**DB ID:** `{db_id}`",
                 inline=True,
             )
+            await ctx.send(embed=embed, ephemeral=True)
         else:
-            log_debug(self.bot, f"DB with ID {db_id} not found.")
-            embed = discord.Embed(title="Error", color=embed_color_failure)
-            embed.add_field(
-                name="Error",
-                value=f"DB with ID {db_id} not found. No action was taken.",
-                inline=True,
-            )
-        await ctx.send(embed=embed)
+            log_debug(self.bot, f"Failed to delete DB with ID: {db_id}")
+            await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="Failed to delete the DB."), ephemeral=True)
+
 
 
 async def setup(bot: "Bot") -> None:
