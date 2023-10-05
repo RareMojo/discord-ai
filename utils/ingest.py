@@ -1,5 +1,4 @@
 import asyncio
-import os
 import tempfile
 from typing import TYPE_CHECKING
 from urllib.parse import urljoin
@@ -12,33 +11,11 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Pinecone
 
 from discord_bot.logger import log_debug, log_error, log_info
+from utils.tools import download_file
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
 
-
-async def download_file(bot: "Bot", session: aiohttp.ClientSession, url: str, output_directory: str):
-    """
-    Downloads a file from a given URL.
-    Args:
-      bot (Bot): The bot instance.
-      session (aiohttp.ClientSession): The aiohttp session.
-      url (str): The URL of the file to download.
-      output_directory (str): The directory to save the file to.
-    Side Effects:
-      Writes the file to the output directory.
-    Examples:
-      >>> download_file(bot, session, 'https://example.com/file.txt', '/tmp/')
-    """
-    async with session.get(url) as response:
-        if response.status == 200:
-            file_name = os.path.join(output_directory, os.path.basename(url))
-            file_content = await response.read()
-            with open(file_name, "wb") as file:
-                file.write(file_content)
-            log_debug(bot, f"Downloaded: {url}")
-        else:
-            log_error(bot, f"Failed to download: {url}")
 
 
 async def ingest(bot: "Bot", url: str, namespace: str):
@@ -75,7 +52,7 @@ async def ingest(bot: "Bot", url: str, namespace: str):
 
         from langchain.document_loaders.readthedocs import ReadTheDocsLoader
 
-        class MyReadThedbLoader(ReadTheDocsLoader):
+        class DBLoader(ReadTheDocsLoader):
             """My custom ReadThedbLoader."""
 
             def _clean_data(self, data: str) -> str:
@@ -86,7 +63,7 @@ async def ingest(bot: "Bot", url: str, namespace: str):
                 Returns:
                   str: The cleaned string.
                 Examples:
-                  >>> MyReadThedbLoader._clean_data('<html><body>Hello World!</body></html>')
+                  >>> MDBLoader._clean_data('<html><body>Hello World!</body></html>')
                   'Hello World!'
                 """
                 from bs4 import BeautifulSoup
@@ -113,7 +90,7 @@ async def ingest(bot: "Bot", url: str, namespace: str):
 
                 return "\n".join([t for t in text.split("\n") if t])
 
-        loader = MyReadThedbLoader(temp_dir, features="html.parser", encoding="utf-8")
+        loader = DBLoader(temp_dir, features="html.parser", encoding="utf-8")
         db = loader.load()
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=2000, chunk_overlap=100

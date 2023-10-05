@@ -21,7 +21,6 @@ sys.path.append("../")
 handler = MongoDBHandler("askdb")
 
 
-
 class AskDB(commands.Cog):
     """
     Cog for querying documents.
@@ -34,13 +33,14 @@ class AskDB(commands.Cog):
           bot (Bot): The bot instance.
         """
         self.bot = bot
+        self.default_db_id = self.bot.default_db_id
 
     @commands.hybrid_command()
     async def askdb(
         self,
         ctx: commands.Context,
         query: str,
-        db_id: str = "ba8e1813-627c-4c82-9de3-c3cfeef3d6f3",  # default to the db_id of gpt-engineer
+        db_id: str = None
     ):
         """
         Queries documents for a given query.
@@ -51,17 +51,20 @@ class AskDB(commands.Cog):
         Returns:
         discord.Embed: An embed containing the query results.
         Examples:
-        >>> await ctx.send(embed=askdb("What is GPT-Engineer?", "2349f359-9c6e-4436-b707-af6492ddd2d7"))
-        Embed containing query results.
+        >>> /askdb What is GPT-Engineer? 2349f359-9c6e-4436-b707-af6492ddd2d7
         """
         channel = ctx.channel
         if channel.category.id != self.bot.chatbot_category_id:
             await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="Please use this command in the 'AI' text-chat category."), ephemeral=True)
             return
-
+        
+        if db_id == None:
+            db_id = self.default_db_id
+        
         if not handler.check_exists(db_id=db_id):
             await ctx.send(embed=discord.Embed(title="Error", color=embed_color_failure, description="The DB ID you provided does not exist."), ephemeral=True)
             return
+        
         await ctx.defer(ephemeral=True)
         chat_history = []
         log_debug(self.bot, f"Query: {query}")
