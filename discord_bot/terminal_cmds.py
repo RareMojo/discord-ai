@@ -438,6 +438,7 @@ def show_help(bot: "Bot") -> None:
         "aliases": "Lists all command aliases.",
         "debug": "Toggles debug mode.",
         "setdb": "Sets the default DB ID for AskDB.",
+        "showsource": "Toggles showing source documents.",
     }
 
     try:
@@ -498,6 +499,7 @@ def show_aliases(bot: "Bot") -> None:
         "alias": ["aliases", "a"],
         "debug": ["d"],
         "setdb": ["defaultdb", "dbd", "dbid"],
+        "showsource": ["showsrc", "src"],
     }
 
     try:
@@ -541,10 +543,11 @@ def ping(bot: "Bot") -> None:
         
 
 def set_default_db_id(bot: "Bot") -> None:
-    """_summary_
+    """
+    Sets the default DB ID for AskDB.
 
     Args:
-        bot (Bot): _description_
+        bot (Bot): The bot instance.
     """
     
     config_file = bot.config_file
@@ -570,10 +573,11 @@ def set_default_db_id(bot: "Bot") -> None:
         
         
 def toggle_show_source_documents(bot: "Bot") -> None:
-    """_summary_
+    """
+    Toggle whether or not to show source documents.
     
     Args:
-        bot (Bot): _description_
+        bot (Bot): The bot instance.
     """
     
     config_file = bot.config_file
