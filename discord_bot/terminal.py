@@ -6,7 +6,7 @@ from discord_bot.terminal_cmds import (exit_bot_terminal, ping, set_bot_avatar,
                                        set_default_db_id, set_owner,
                                        set_persona, show_aliases, show_help,
                                        sync_commands, toggle_debug_mode,
-                                       wipe_config)
+                                       wipe_config, toggle_show_source_documents)
 
 if TYPE_CHECKING:
     from discord_bot.bot import Bot
@@ -175,7 +175,11 @@ class TerminalCommands:
             
         elif user_command in ["setdb", "defaultdb", "dbd", "dbid"]:
             self.bot.log.debug("Setting default DB ID...")
-            await set_default_db_id(self.bot)
+            set_default_db_id(self.bot)
+            
+        elif user_command in ["showsource", "showsrc", "src"]:
+            self.bot.log.debug("Toggling show source documents...")
+            toggle_show_source_documents(self.bot)
 
         else:
             self.bot.log.info(f"{user_command} is not a recognized command.")

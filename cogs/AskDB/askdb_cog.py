@@ -1,3 +1,4 @@
+import os
 import sys
 from typing import TYPE_CHECKING
 
@@ -101,6 +102,15 @@ class AskDB(commands.Cog):
                 color=embed_color_chat,
             )
 
+            if self.bot.show_source_documents == True:
+                for i, doc in enumerate(parsed_documents, start=1):
+                    source = doc['metadata']['source']
+                    source_name = os.path.basename(source)
+                    embed.add_field(name=f"Source {i}", value=f'{source_name}', inline=True)
+
+                source_count = len(parsed_documents)
+                embed.set_footer(text=f"Total Sources: {source_count}")
+                
             embed.add_field(name="Prompt:", value=f"**{query}**", inline=False)
         except Exception as e:
             log_error(self.bot, f"Error querying the DB: {e}")

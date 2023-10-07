@@ -38,6 +38,7 @@ def get_new_config():
         "bot_name": input("Bot Name: "),
         "presence": input("Presence: "),
         "persona": input("Persona: "),
+        "show_source_documents": True,
         "default_db_id": "UNDEFINED",
         "log_level": "INFO",
         "update_bot": True,

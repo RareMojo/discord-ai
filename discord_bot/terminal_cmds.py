@@ -546,6 +546,12 @@ def set_default_db_id(bot: "Bot") -> None:
     Args:
         bot (Bot): _description_
     """
+    
+    config_file = bot.config_file
+
+    with open(config_file, "r") as f:
+        config = json.load(f)
+
     bot.log.info("Current default DB ID: {}".format(bot.default_db_id))
     change_default_db_id = get_boolean_input(bot, "Would you like to change the default DB ID? (y/n) ")
             
@@ -554,10 +560,35 @@ def set_default_db_id(bot: "Bot") -> None:
             new_db_id = input("Enter new default DB ID: ")
             bot.default_db_id = new_db_id
             new_data = {"default_db_id": new_db_id}
-            update_config(bot.config_file, new_data)
+            update_config(config, new_data)
             bot.log.info("Default DB ID changed.")
             
         else:
             bot.log.info("Default DB ID not changed.")
     except Exception as e:
         bot.log.error(f"Error in set_default_db_id function: {e}")
+        
+        
+def toggle_show_source_documents(bot: "Bot") -> None:
+    """_summary_
+    
+    Args:
+        bot (Bot): _description_
+    """
+    
+    config_file = bot.config_file
+
+    bot.log.info("Current show source documents: {}".format(bot.show_source_documents))
+    change_show_source_documents = get_boolean_input(bot, "Would you like to toggle show source documents? (y/n) ")
+    
+    try:
+        if change_show_source_documents == True:
+            bot.show_source_documents = not bot.show_source_documents
+            new_data = {"show_source_documents": bot.show_source_documents}
+            update_config(config_file, new_data)
+            bot.log.info("Show source documents changed.")
+            
+        else:
+            bot.log.info("Show source documents not changed.")
+    except Exception as e:
+        bot.log.error(f"Error in toggle_show_source_documents function: {e}")

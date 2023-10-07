@@ -76,6 +76,7 @@ class Bot(commands.Bot):
 
         self.default_db_id = self.config.get("default_db_id")
         self.display_name = self.config.get("bot_name")
+        self.show_source_documents = self.config.get("show_source_documents")
 
         super().__init__(command_prefix=self.config.get("prefix"), intents=intents)
         self.log.debug("Bot initialized.")
